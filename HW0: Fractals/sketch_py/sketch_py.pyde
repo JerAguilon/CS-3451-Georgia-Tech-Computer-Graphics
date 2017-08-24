@@ -1,7 +1,7 @@
-__length = 600
+_length = 600
 
 def setup():
-    size(__length,__length)
+    size(_length,_length)
 
 def draw():
     background(255)
@@ -20,27 +20,27 @@ def draw():
 
 # returns a rainbow given a coordinate
 def getColor(coord):
-    delta = __length / float(6)
+    delta = _length / float(6)
     
-    if coord > __length - delta:
+    if coord > _length - delta:
         return (146, 0, 211)
-    elif coord > __length - 2 * delta:
+    elif coord > _length - 2 * delta:
         return (0, 0, 255)
-    elif coord > __length - 3 * delta:
+    elif coord > _length - 3 * delta:
         return (0, 255, 0)
-    elif coord > __length - 4 * delta:
+    elif coord > _length - 4 * delta:
         return (255, 255, 0)
-    elif coord > __length - 5 * delta:
+    elif coord > _length - 5 * delta:
         return (255, 127, 0)
     else:
         return (255, 0, 0)
 
 def convert(coord):
     # from range [-3, -3]
-    return (100 * coord) + __length / 2
+    return (100 * coord) + _length / 2
 
 def convertMouse(mouseCoord):
-    return (mouseCoord - __length / 2)/float(150)
+    return (mouseCoord - _length / 2)/float(150)
 
 # returns a list of relevant points to be plotted
 def powerSum(vector):
