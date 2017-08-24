@@ -18,6 +18,7 @@ def draw():
         fill(currColor[0], currColor[1], currColor[2])
         ellipse(x, y, 7, 7)
 
+# returns a rainbow given a coordinate
 def getColor(coord):
     delta = __length / float(6)
     
@@ -55,7 +56,9 @@ def powerSum(vector):
     
 def powerSumRecursive(vectors, result, n):
     numberBranches = 2**n
-    # set theory: there are 2^n possible sets for each stack frame
+    # set theory: there are 2^n elements in a power set,
+    # we can allow a 0 to represent subtracting a vector and
+    # 1 to represent adding a vector
     for i in range(numberBranches):
         curr = i
         counter = 0
