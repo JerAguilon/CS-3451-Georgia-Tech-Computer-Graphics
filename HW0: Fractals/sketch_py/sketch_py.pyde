@@ -1,5 +1,19 @@
 _length = 500
 
+# helper class for complex numbers
+class Complex(object):
+    def __init__(self, real=0.0, imag=0.0):
+        self.real = real
+        self.imag = imag
+    def __add__(self, other):
+        return Complex(self.real + other.real, self.imag + other.imag)
+    def __mul__(self, other):
+        return Complex(
+                   self.real * other.real - self.imag * other.imag,
+                   self.imag * other.real + self.real * other.imag)
+    def __sub__(self, other):
+        return Complex(self.real - other.real, self.imag - other.imag)
+
 def setup():
     size(_length,_length)
 
@@ -27,7 +41,7 @@ def draw():
     xCoord = convertMouse(mouseX)
     yCoord = -convertMouse(mouseY) # positive should be upwards
     print(str(xCoord) + "  " + str(yCoord))
-    coords = powerSum(complex(xCoord, yCoord))
+    coords = powerSum(Complex(xCoord, yCoord))
     print(len(coords))
     for coord in coords:
         x = convert(coord.real)
@@ -65,7 +79,7 @@ def convertMouse(mouseCoord):
 def powerSum(vector):
     result = []
     
-    vectors = [complex(1,0)]
+    vectors = [Complex(1,0)]
     
     for i in range(1, 9):
         vectors.append(vector * vectors[i - 1])
@@ -80,7 +94,7 @@ def powerSumRecursive(vectors, result, n):
     for i in range(numberBranches):
         curr = i
         counter = 0
-        newVector = complex(0, 0)
+        newVector = Complex(0, 0)
         while (counter < n):
             item = curr % 2 # get the rightmost bit
             if item == 1:
