@@ -2,7 +2,6 @@
 
 from matlib import *
 
-activeMatrix = None
 vertices = []
 
 k = -1
@@ -10,35 +9,34 @@ nearclip = -1
 farclip = -1
 mode = -1
 
-def gtOrtho(left, right, bottom, top, near, far):
-    global activeMatrix
-    matrix_test = [[float(width)/(right - left),0,0,-left],
-              [0, float(height)/(top - bottom),0,-bottom],
-              [0,0,1,0],
-              [0,0,0,1]]
-    
-    matrix1 = [[float(width)/2,0,0,float(width - 1)/2],
-              [0, float(height)/2 ,0, float(height - 1) / 2],
-              [0,0,1,0],
-              [0,0,0,1]]
-    matrix2 = [[float(2)/(right-left),0,0,-float(left+right)/2],
-               [0,float(2)/(top-bottom),0,-float(bottom+top)/2],
-               [0,0,1,0],
-               [0,0,0,1]]
-    print(matrix1)
-    print(matrix2)
-    finalMatrix = matrix_test#multiply(matrix1, matrix2)
-    activeMatrix = finalMatrix
-def gtPerspective(fov, near, far):
-    global mode
-    mode = 2
+lleft = -1
+rright = -1
+ttop = -1
+bbottom = -1
 
-    k = near*tan((float(fov*pi)/180)/2)
-    nearclip = near
-    farclip = far
-    print(k)
-    print(nearclip)
-    print(farclip)
+ffov = -1
+nnear = -1
+ffar = -1
+
+def gtOrtho(left, right, bottom, top, near, far):
+    global lleft
+    global rright
+    global ttop
+    global bbottom
+    global mode
+    
+    lleft = left
+    rright = right
+    bbottom = bottom
+    ttop = top
+    
+    mode = 1
+def gtPerspective(fov, near, far):
+    global mode, ffov, nnear, ffar
+    mode = 2
+    ffov = fov
+    nnear = near
+    ffar = ffar
 
 def frustum(l, r, b, t, n, f):
     matrix = createIdentity()
@@ -53,13 +51,10 @@ def frustum(l, r, b, t, n, f):
     return matrix
 
 def gtBeginShape():
-    global vertices
-    vertices = []
-
+    pass
 
 def gtEndShape():
-    global vertices
-    vertices = []
+    pass
 
 def gtVertex(x, y, z):
     global mode
@@ -71,25 +66,32 @@ def gtVertex(x, y, z):
     lastVector = multiplyVector(stack.peek(), vertices[0])
     currVector = multiplyVector(stack.peek(), [x,y,z,1])
     
-    if mode != 2:
-        print("ACTIVE MATRIX: " + str(activeMatrix))
-        lastVector = multiplyVector(activeMatrix, lastVector)
-        currVector = multiplyVector(activeMatrix, currVector)
+    
+    if mode == 1:
+        global ttop, bbottom, lleft, rright
+        lastVector[0] = float(lastVector[0] - lleft) / (rright - lleft) * width
+        lastVector[1] = float(lastVector[1] - bbottom) / (ttop - bbottom) * height
         
-        #normalizeVector(lastVector)
-        #normalizeVector(currVector)
+        currVector[0] = float(currVector[0] - lleft) / (rright - lleft) * width
+        currVector[1] = float(currVector[1] - bbottom) / (ttop - bbottom) * height
     else:
-        xstartp = nearclip*lastVector[0]/abs(lastVector[2])
-        ystartp = nearclip*lastVector[1]/abs(lastVector[2])
+        global ffov
+        print(" PREVVECTORS {} {}".format(lastVector, currVector))
+
+        lastVectorPerspX = float(lastVector[0]) / abs(lastVector[2])
+        lastVectorPerspY = float(lastVector[1]) / abs(lastVector[2])
         
-        xendp = nearclip*currVector[0]/abs(lastVector[2])
-        yendp = nearclip*currVector[1]/abs(lastVector[2])
+        currVectorPerspX = float(currVector[0]) / abs(currVector[2])
+        currVectorPerspY = float(currVector[1]) / abs(currVector[2])
         
-        lastVector[0] = (xstartp+k)*width/(2*k)
-        lastVector[1] = (ystartp+k)*height/(2*k)
-        currVector[0] = (xendp+k)*width/(2*k)
-        currVector[1] = (yendp+k)*height/(2*k)
-    print("VECTORS: " + str(lastVector) + " " + str(currVector))
+        radFov = ffov * pi / 180
+        k = tan(radFov/2)
+        print("K: " + str(k))
+        lastVector[0] = (float(lastVectorPerspX + k)) * (width / float(2*k))
+        lastVector[1] = (float(lastVectorPerspY + k)) * (height / float(2*k))
+        currVector[0] = (float(currVectorPerspX + k)) * (width / float(2*k))
+        currVector[1] = (float(currVectorPerspY + k)) * (height / float(2*k))
+        print(" VECTORS {} {}".format(lastVector, currVector))
     line(lastVector[0], height-lastVector[1], currVector[0], height-currVector[1])
     vertices = []
     
