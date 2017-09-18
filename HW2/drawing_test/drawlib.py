@@ -69,11 +69,13 @@ def gtVertex(x, y, z):
     
     if mode == 1:
         global ttop, bbottom, lleft, rright
-        lastVector[0] = float(lastVector[0] - lleft) / (rright - lleft) * width
-        lastVector[1] = float(lastVector[1] - bbottom) / (ttop - bbottom) * height
-        
-        currVector[0] = float(currVector[0] - lleft) / (rright - lleft) * width
-        currVector[1] = float(currVector[1] - bbottom) / (ttop - bbottom) * height
+
+        matrix = [[float(width) / (rright - lleft),0,0,float(-lleft) * width / (rright - lleft)],
+            [0, float(height)/(ttop - bbottom),0,float(-bbottom) * height / (ttop - bbottom)],
+            [0,0,1,0],
+            [0,0,0,1]]
+        lastVector = multiplyVector(matrix, lastVector)
+        currVector = multiplyVector(matrix, currVector)
     else:
         global ffov
         print(" PREVVECTORS {} {}".format(lastVector, currVector))
