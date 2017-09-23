@@ -40,18 +40,23 @@ def draw():
     # sphere(10)
     # popMatrix()
 
-    # # blue cylinder
-    # fill (0, 0, 255)
-    # pushMatrix()
-    # translate (30, 0, 0)
-    # rotateX (-time)
-    # scale (10, 10, 10)
-    # cylinder()
-    # popMatrix()
     
     pushMatrix()
-    rotateY(1)
+    # rotateY(time)
+    # rotateX(time)
+    # rotateZ(time)
+    rotateY(-pi/5)
     
+    
+    # nose
+    fill (255, 100, 0)
+    pushMatrix()
+    translate (0, -24, 0)
+    scale (1, 1, 10)
+    cone()
+    popMatrix()
+    
+    # body
     fill (255, 255, 255)
     pushMatrix()
     sphereDetail(60)  # this controls how many polygons are used to make a sphere
@@ -70,7 +75,7 @@ def draw():
     sphere(6)
     popMatrix()
 
-    # eyes
+    # eyes    
     pushMatrix()
     scale(1,1,.9)
     fill (0, 0, 0)
@@ -78,7 +83,6 @@ def draw():
     translate (-2, -25, 6)
     cylinder()
     popMatrix()
-    fill (0, 0, 0)
     pushMatrix()
     translate (2, -25, 6)
     cylinder()
@@ -86,14 +90,24 @@ def draw():
     popMatrix()
     
     # scarf
-    fill (0, 0, 0)
-    pushMatrix()
-    translate (0, -20, 0)
-    rotateX (pi/2)
-    scale (6, 6, 1)
     scarf()
+    
+    # hat
+    pushMatrix()
+    scale(5,5.8,5)
+    fill (0, 0, 0)
+    translate (0, -5.5, 0)
+    rotateX(pi/2)
+    cylinder()
     popMatrix()
         
+    pushMatrix()
+    fill (0, 0, 0)
+    translate (0, -28, 0)
+    rotateX(pi/2)
+    scale(8,8,.3)
+    cylinder()
+    popMatrix()
     popMatrix()
 
 def scarf(sides=64):
@@ -101,6 +115,10 @@ def scarf(sides=64):
     
     _red = (255,0,0)
     _green = (0,255,0)
+    pushMatrix()
+    translate (0, -20, 0)
+    rotateX (pi/2)
+    scale (6, 6, 1)
     beginShape()
     for i in range(sides):
         if int(i/4) % 2 == 0:
@@ -145,7 +163,51 @@ def scarf(sides=64):
         endShape(CLOSE)
         x1 = x2
         y1 = y2
+    popMatrix()
+    
+    fill (255, 0, 0)
+    pushMatrix()
+    translate(6,-17,6)
+    rotateY(pi/2.5)
+    rotateX(pi/4)
+    rotateZ(-pi/3.9)
 
+    box(3,3,.3)
+    fill (0, 255, 0)
+    translate(3,0,0)
+    box(3,3,.3)
+
+    popMatrix()
+
+def cone(sides = 64, height = 1):
+    # base circle
+    beginShape()
+    for i in range(sides):
+        theta = i * 2 * PI / sides
+        x = cos(theta)
+        y = sin(theta)
+        vertex ( x,  y, 0)
+    endShape(CLOSE)
+
+    # sides
+    x1 = 1
+    y1 = 0
+    for i in range(64):
+        theta1 = i * 2 * PI / sides
+        theta2 = (i + 1) * 2 * PI / sides
+        x2 = cos(theta2)
+        y2 = sin(theta2)
+        x1 = cos(theta1)
+        y1 = sin(theta1)
+        beginShape(TRIANGLES)
+        vertex(x1, y1, 0)
+        vertex(x2, y2, 0)
+        
+        vertex(0,0, 1)
+
+
+        endShape(CLOSE)
+    
 # cylinder with radius = 1, z range in [-1,1]
 def cylinder(sides = 64):
     # first endcap
