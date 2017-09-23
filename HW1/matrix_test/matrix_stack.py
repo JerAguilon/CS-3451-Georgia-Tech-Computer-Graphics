@@ -14,10 +14,10 @@ class Stack(object):
         return self.__storage[len(self.__storage) - 1]
 
     def pop(self):
-        return self.__storage.pop()
-
-    def canPop(self):
-        return len(self.__storage) == 1
+        if len(self.__storage) == 1:
+            print("cannot pop the matrix stack")
+        else:
+            self.__storage.pop()
 
     def updateTop(self, newArr):
         top = self.peek()
@@ -31,25 +31,24 @@ class Stack(object):
 stack = Stack()
 pi = 3.1415926513589793238462643383
 
-def _createIdentity():
+def createIdentity():
     return [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
 def _createEmpty():
     return [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 
 
-def _multiply(stackMatrix, trans):
+def multiply(trans, stackMatrix):
     newArray = _createEmpty()
     for i in range(4):
         for j in range(4):
-   
             for k in range(4):
                 newArray[i][j] += stackMatrix[i][k] * trans[k][j]
-    stack.updateTop(newArray)
+    return newArray
 
 def gtInitialize():
     stack.clear()
-    arr = _createIdentity()
+    arr = createIdentity()
     stack.push(arr)
 
 def gtPushMatrix():
@@ -58,59 +57,56 @@ def gtPushMatrix():
     stack.push(newCopy)
 
 def gtPopMatrix():
-    if stack.isEmpty():
-        print("Cannot pop the matrix stack")
-    else:
-        stack.pop()
+    stack.pop()
 
 def gtTranslate(x, y, z):
-    trans = _createIdentity()
+    trans = createIdentity()
     trans[0][3] = x
     trans[1][3] = y
     trans[2][3] = z
-    _multiply(stack.peek(), trans)
+    stack.updateTop(multiply(trans, stack.peek()))
 
 
 def gtScale(x, y, z):
-    trans = _createIdentity()
+    trans = createIdentity()
     trans[0][0] = x
     trans[1][1] = y
     trans[2][2] = z
-    _multiply(stack.peek(), trans)
+    stack.updateTop(multiply(trans, stack.peek()))
     pass
 
 def gtRotateX(theta):
     theta = theta * pi / 180
-    trans = _createIdentity()
+    trans = createIdentity()
     cosTheta = cos(theta)
     sinTheta = sin(theta)
     trans[1][1] = cosTheta
     trans[1][2] = -sinTheta
     trans[2][1] = sinTheta
     trans[2][2] = cosTheta
-    _multiply(stack.peek(), trans)
+    stack.updateTop(multiply(trans, stack.peek()))
 
 def gtRotateY(theta):
     theta = theta * pi / 180
-    trans = _createIdentity()
+    trans = createIdentity()
     cosTheta = cos(theta)
     sinTheta = sin(theta)
     trans[0][0] = cosTheta
     trans[0][2] = sinTheta
     trans[2][0] = -sinTheta
     trans[2][2] = cosTheta
-    _multiply(stack.peek(), trans)
+    stack.updateTop(multiply(trans, stack.peek()))
 
 def gtRotateZ(theta):
     theta = theta * pi / 180
-    trans = _createIdentity()
+    trans = createIdentity()
     cosTheta = cos(theta)
     sinTheta = sin(theta)
     trans[0][0] = cosTheta
     trans[0][1] = -sinTheta
     trans[1][0] = sinTheta
     trans[1][1] = cosTheta
-    _multiply(stack.peek(), trans)
+    stack.updateTop(multiply(trans, stack.peek()))
 
 def gtGetMatrix():
     pass
