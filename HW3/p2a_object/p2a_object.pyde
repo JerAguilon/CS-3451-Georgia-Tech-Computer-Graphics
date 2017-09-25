@@ -7,6 +7,9 @@ def setup():
     size (800, 800, P3D)
     perspective (60 * PI / 180, 1, 0.1, 1000)  # 60 degree field of view
     
+angle = 0;
+state = 0;
+
 def draw():
     global time
     time += 0.01
@@ -39,14 +42,35 @@ def draw():
     # sphereDetail(60)  # this controls how many polygons are used to make a sphere
     # sphere(10)
     # popMatrix()
-
+    pushMatrix()
+    global angle, state
+    if angle >= (pi * 2 - .03) and angle <= (pi * 2 + .03):
+        angle = 0
+        state = (state + 1) % 3
+    else:
+        angle = (time * 3) % (pi * 2)
+    
+    if state == 0:
+        rotateY(angle)
+    elif state == 1:
+        rotateZ(angle)
+    else:
+        rotateX(angle)
+            
+    fill(139,69,19)
+    pushMatrix()
+    translate(8, -15, 0)
+    rotateZ(-pi/20)
+    hand()
+    popMatrix()
     
     pushMatrix()
-    # rotateY(time)
-    # rotateX(time)
-    # rotateZ(time)
-    rotateY(-pi/5)
-    
+    translate(-8, -15, 0)
+    rotateZ(pi/20)
+    rotateY(pi)
+    hand()
+    popMatrix()
+
     
     # nose
     fill (255, 100, 0)
@@ -96,8 +120,9 @@ def draw():
     pushMatrix()
     scale(5,5.8,5)
     fill (0, 0, 0)
-    translate (0, -5.5, 0)
+    translate (.2, -5.5, 0)
     rotateX(pi/2)
+    rotateY(pi/20)
     cylinder()
     popMatrix()
         
@@ -105,9 +130,33 @@ def draw():
     fill (0, 0, 0)
     translate (0, -28, 0)
     rotateX(pi/2)
+    rotateY(pi/20)
     scale(8,8,.3)
     cylinder()
     popMatrix()
+    popMatrix()
+
+def hand():
+    pushMatrix()
+    scale(3,.5,1)
+    rotateY(pi/2)
+    cylinder()
+    popMatrix()
+    
+    pushMatrix()
+    translate(4,-1,0)
+    rotateZ(-pi/5)
+    scale(2,.5,1)
+    rotateY(pi/2)
+    cylinder()
+    popMatrix()
+    
+    pushMatrix()
+    translate(4,1,0)
+    rotateZ(pi/5)
+    scale(2,.5,1)
+    rotateY(pi/2)
+    cylinder()
     popMatrix()
 
 def scarf(sides=64):
