@@ -1,7 +1,6 @@
 # Animation Example
 
 time = 0   # use time to move objects from one frame to the next
-pi = 3.141592653
 
 def setup():
     size (800, 800, P3D)
@@ -44,11 +43,11 @@ def draw():
     # popMatrix()
     pushMatrix()
     global angle, state
-    if angle >= (pi * 2 - .03) and angle <= (pi * 2 + .03):
+    if angle >= (PI * 2 - .03) and angle <= (PI * 2 + .03):
         angle = 0
         state = (state + 1) % 3
     else:
-        angle = (time * 3) % (pi * 2)
+        angle = (time * 3) % (PI * 2)
     
     if state == 0:
         rotateY(angle)
@@ -60,14 +59,14 @@ def draw():
     fill(139,69,19)
     pushMatrix()
     translate(8, -15, 0)
-    rotateZ(-pi/20)
+    rotateZ(-PI/20)
     hand()
     popMatrix()
     
     pushMatrix()
     translate(-8, -15, 0)
-    rotateZ(pi/20)
-    rotateY(pi)
+    rotateZ(PI/20)
+    rotateY(PI)
     hand()
     popMatrix()
 
@@ -121,16 +120,16 @@ def draw():
     scale(5,5.8,5)
     fill (0, 0, 0)
     translate (.2, -5.5, 0)
-    rotateX(pi/2)
-    rotateY(pi/20)
+    rotateX(PI/2)
+    rotateY(PI/20)
     cylinder()
     popMatrix()
         
     pushMatrix()
     fill (0, 0, 0)
     translate (0, -28, 0)
-    rotateX(pi/2)
-    rotateY(pi/20)
+    rotateX(PI/2)
+    rotateY(PI/20)
     scale(8,8,.3)
     cylinder()
     popMatrix()
@@ -139,23 +138,23 @@ def draw():
 def hand():
     pushMatrix()
     scale(3,.5,1)
-    rotateY(pi/2)
+    rotateY(PI/2)
     cylinder()
     popMatrix()
     
     pushMatrix()
     translate(4,-1,0)
-    rotateZ(-pi/5)
+    rotateZ(-PI/5)
     scale(2,.5,1)
-    rotateY(pi/2)
+    rotateY(PI/2)
     cylinder()
     popMatrix()
     
     pushMatrix()
     translate(4,1,0)
-    rotateZ(pi/5)
+    rotateZ(PI/5)
     scale(2,.5,1)
-    rotateY(pi/2)
+    rotateY(PI/2)
     cylinder()
     popMatrix()
 
@@ -166,7 +165,7 @@ def scarf(sides=64):
     _green = (0,255,0)
     pushMatrix()
     translate (0, -20, 0)
-    rotateX (pi/2)
+    rotateX (PI/2)
     scale (6, 6, 1)
     beginShape()
     for i in range(sides):
@@ -217,9 +216,9 @@ def scarf(sides=64):
     fill (255, 0, 0)
     pushMatrix()
     translate(6,-17,6)
-    rotateY(pi/2.5)
-    rotateX(pi/4)
-    rotateZ(-pi/3.9)
+    rotateY(PI/2.5)
+    rotateX(PI/4)
+    rotateZ(-PI/3.9)
 
     box(3,3,.3)
     fill (0, 255, 0)
