@@ -2,18 +2,24 @@
 
 time = 0   # use time to move objects from one frame to the next
 
+    
+angle = 0;
+
+igloo = None
+
 def setup():
     size (800, 800, P3D)
     perspective (60 * PI / 180, 1, 0.1, 1000)  # 60 degree field of view
+    global igloo, frosty
+    igloo = loadShape("igloo2.obj")
     
-angle = 0;
-state = 0;
-
 def draw():
-    global time
+    global time, igloo, frosty
     time += 0.01
-
-    camera (0, 0, 100, 0, 0, 0, 0,  1, 0)  # position the virtual camera
+    if time >= 7.20:
+        time = 7.20
+    print(time)
+    camera (time * 10, 0, 100 + time * 10, time * 30, 0, 0, 0,  1, 0)  # position the virtual camera
 
     background (220, 220, 220)  # clear screen and set background to white
     
@@ -26,38 +32,29 @@ def draw():
     specular (180, 180, 180)
     #shininess (15.0)
     
-    # # red box
-    # fill (255, 0, 0)
-    # pushMatrix()
-    # translate (-30, 0, 0)
-    # rotateX (time)
-    # box(20)
-    # popMatrix()
-
-    # # green sphere
-    # fill (0, 250, 0)
-    # pushMatrix()
-    # translate (0, 8 * sin(4 * time), 0)  # move up and down
-    # sphereDetail(60)  # this controls how many polygons are used to make a sphere
-    # sphere(10)
-    # popMatrix()
     pushMatrix()
-    global angle, state
-    if angle >= (PI * 2 - .03) and angle <= (PI * 2 + .03):
-        angle = 0
-        state = (state + 1) % 3
-    else:
-        angle = (time * 3) % (PI * 2)
+    global igloo
+    translate(300, 0, 0)
+    scale(.8, .8, .8)
+    rotateY(PI)
+    rotateX(PI)
+    shape(igloo) 
+    popMatrix()
     
-    if state == 0:
-        rotateY(angle)
-    elif state == 1:
-        rotateZ(angle)
-    else:
-        rotateX(angle)
-            
-    fill(139,69,19)
     pushMatrix()
+    translate(0, -abs(sin(time * 7)) * 10, 0);
+    translate(-50 + time * 30, 30, 0)
+
+    scale(.7, .7, .7)
+    rotateY(PI / 2)
+    rotateZ(sin(time * 7) / 5)
+    frosty()
+    popMatrix()
+
+def frosty():
+    pushMatrix()
+    fill(139,69,19)
+
     translate(8, -15, 0)
     rotateZ(-PI/20)
     hand()
@@ -133,8 +130,6 @@ def draw():
     scale(8,8,.3)
     cylinder()
     popMatrix()
-    popMatrix()
-
 def hand():
     pushMatrix()
     scale(3,.5,1)
