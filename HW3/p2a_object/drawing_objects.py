@@ -1,8 +1,6 @@
 class AnimationObject(object):
     def __init__(self):
-
-
-        
+        pass
 class Light(object):
     def __init__(self, x, y, z):
         self.x = x
@@ -46,7 +44,7 @@ class Light(object):
                         dz = .5
                     self.translate(self.x + dx, self.y, self.z + dz)
                     self.rotate(0, angle, sin(time * 7) / 5)
-    def disp(self):
+    def disp(self, time):
         self.manipulate(time)
         _red = (255,0,0)
         _green = (0,255,0)
@@ -112,7 +110,7 @@ class Frosty(object):
                         dz = -.5
                     elif zVector > 0:
                         dz = .5
-                    self.translate(self.x + dx, self.y, self.z + dz)
+                    self.translate(self.x + dx, 55 - abs(sin(time * 7) * 8), self.z + dz)
                     self.rotate(0, angle, sin(time * 7) / 5)
     def translate(self, x, y, z):
         self.x = x

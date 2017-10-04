@@ -84,7 +84,7 @@ def walkingUp(time):
     #lightSpecular(255, 255, 255)
     ambientLight(50, 50, 50);
     for christmasLight in christmasLights:
-        christmasLight.disp() 
+        christmasLight.disp(time) 
 
     #ightSpecular(255, 255, 255)
     directionalLight (100, 100, 100, -0.3, 0.5, -1)
