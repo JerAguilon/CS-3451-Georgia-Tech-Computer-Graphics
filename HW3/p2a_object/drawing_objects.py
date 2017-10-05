@@ -1,3 +1,5 @@
+from goals import *
+
 class AnimationObject(object):
     def __init__(self):
         pass
@@ -8,42 +10,29 @@ class Light(object):
         self.z = z
         self.goals = []
         self.goalIndex = 0
-        
     def goalsMet(self):
         return self.goalIndex == len(self.goals)    
     def addGoal(self, goal):
         self.goals.append(goal)
     def manipulate(self, time):
+        print(self.goals)
         if len(self.goals) > 0 and self.goalIndex < len(self.goals):
             goal = self.goals[self.goalIndex]
-            if goal.hasBeenReached(self.x, self.z):
+            if goal.hasBeenReached(self.x, self.y, self.z):
                 self.goalIndex += 1
-                self.rotate(0, self.ry, 0)
                 return
             else:
-                xVector = goal.x - self.x
-                zVector = goal.z - self.z
-                baseVector = [0, 1]
-                angle = acos(baseVector[0] * xVector + baseVector[1] * zVector / (xVector**2 + zVector**2)**.5) % PI
-                diff = self.ry - angle
-                if diff > .2 or diff < -.2:
-                    if diff < 0:
-                        self.rotate(0, self.ry + .05, 0)
-                    else:
-                        self.rotate(0, self.ry - .05, 0)
-                else:
-                    dx = 0
-                    dz = 0
-                    if xVector < 0:
-                        dx = -.5
-                    elif xVector > 0:
-                        dx = .5
-                    if zVector < 0:
-                        dz = -.5
-                    elif zVector > 0:
-                        dz = .5
-                    self.translate(self.x + dx, self.y, self.z + dz)
-                    self.rotate(0, angle, sin(time * 7) / 5)
+                yVector = self.y - goal.y
+                dy = 0
+                if yVector > .05:
+                    dy = -2
+                elif yVector < -.05:
+                    dy = 2
+                self.translate(self.x, self.y + dy, self.z)
+    def translate(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
     def disp(self, time):
         self.manipulate(time)
         _red = (255,0,0)
@@ -65,13 +54,44 @@ class Light(object):
         translate(self.x, self.y - 5, self.z)
         sphere(4)
         popMatrix()
-        
+
+    
+class Camera(object):
+    
+    def __init__(self):
+        self.ex = 0
+        self.ey = 0
+        self.ez = 0
+        self.cx = 0
+        self.cy = 0
+        self.cz = 0
+        self.ux = 0
+        self.uy = 0
+        self.uz = 0
+    def manipulate(self, time):
+        if time <= 4:
+            self.setEye(time * 30, 0, 150)
+            self.setCenter(time * 30, 0, 0)
+    def setEye(self, x, y, z):
+        self.ex = x
+        self.ey = y
+        self.ez = z
+    def setCenter(self, x, y, z):
+        self.cx = x
+        self. cy = y
+        self.cz = z
+    def setUp(self, x, y, z):
+        self.ux = x
+        self.uy = y
+        self.uz = z
+    def disp(self):
+        camera(self.ex, self.ey, self.ez, self.cx, self.cy, self.cz, self.ux, self.uy, self.uz)    
       
 class Frosty(object):        
     def __init__(self):
         self.x = -50
         self.y = 55
-        self.z = 0
+        self.z = 20
         self.rx = 0
         self.ry = PI / 2
         self.rz = 0
@@ -84,34 +104,58 @@ class Frosty(object):
     def manipulate(self, time):
         if len(self.goals) > 0 and self.goalIndex < len(self.goals):
             goal = self.goals[self.goalIndex]
-            if goal.hasBeenReached(self.x, self.z):
-                self.goalIndex += 1
-                self.rotate(0, self.ry, 0)
-                return
-            else:
-                xVector = goal.x - self.x
-                zVector = goal.z - self.z
-                baseVector = [0, 1]
-                angle = acos(baseVector[0] * xVector + baseVector[1] * zVector / (xVector**2 + zVector**2)**.5) % PI
-                diff = self.ry - angle
-                if diff > .2 or diff < -.2:
-                    if diff < 0:
-                        self.rotate(0, self.ry + .05, 0)
-                    else:
-                        self.rotate(0, self.ry - .05, 0)
+            if type(goal) is MovementGoal:
+                if goal.hasBeenReached(self.x,self.y, self.z):
+                    self.goalIndex += 1
+                    self.rotate(0, self.ry, 0)
+                    self.translate(self.x, 55, self.z)
+                    return
                 else:
-                    dx = 0
-                    dz = 0
-                    if xVector < 0:
-                        dx = -.5
-                    elif xVector > 0:
-                        dx = .5
-                    if zVector < 0:
-                        dz = -.5
-                    elif zVector > 0:
-                        dz = .5
-                    self.translate(self.x + dx, 55 - abs(sin(time * 7) * 8), self.z + dz)
-                    self.rotate(0, angle, sin(time * 7) / 5)
+                    xVector = goal.x - self.x
+                    zVector = goal.z - self.z
+                    baseVector = [0, 1]
+                    if xVector == 0 and zVector == 0:
+                        angle = self.ry
+                    else:
+                        angle = acos(baseVector[0] * xVector + baseVector[1] * zVector / (xVector**2 + zVector**2)**.5) % (2*PI)
+                    diff = self.ry - angle
+                    if diff > .2 or diff < -.2:
+                        if diff < 0:
+                            self.rotate(0, self.ry + .05, 0)
+                        else:
+                            self.rotate(0, self.ry - .05, 0)
+                    else:
+                        dx = 0
+                        dz = 0
+                        if xVector < 0:
+                            dx = -.5
+                        elif xVector > 0:
+                            dx = .5
+                        if zVector < 0:
+                            dz = -.5
+                        elif zVector > 0:
+                            dz = .5
+                        self.translate(self.x + dx, 55 - abs(sin(time * 7) * 8), self.z + dz)
+                        self.rotate(0, angle, sin(time * 7) / 5)
+            elif type(goal) is RotationGoal:
+                import random
+                print(random.randint(1,20))
+                if goal.hasBeenReached(self.rx, self.ry, self.rz):
+                    self.goalIndex += 1
+                    return
+                else:
+                    rotation = self.ry
+                    diff = rotation - goal.ry
+                    print("{} {} --> {}".format(rotation, self.ry, diff))
+                    if diff < 0:
+                        self.rotate(0, self.ry + .2, 0)
+                    else:
+                        self.rotate(0, self.ry - .2, 0)
+            else:
+                if goal.hasBeenReached():
+                    self.goalIndex += 1
+                    return
+
     def translate(self, x, y, z):
         self.x = x
         self.y = y
