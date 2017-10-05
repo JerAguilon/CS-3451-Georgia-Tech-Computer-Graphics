@@ -137,18 +137,20 @@ class Frosty(object):
                     yVector = goal.y - self.y
                     zVector = goal.z - self.z
                     
+                    a = 2 / (xVector**2 + yVector**2)
+                    
                     dx = 0
                     dy = 0
                     dz = 0
                     
                     if xVector < 0:
-                        dx = -(2 - dy**2)**.5
+                        dx = -((2 / a - yVector **2) ** .5)
                     elif xVector > 0:
-                        dx = (2 - dy**2)**.5
+                        dx = (2 / a - yVector **2) ** .5
                     if yVector < 0:
-                        dy = -(2 - dx**2)**.5
+                        dy = -((2 / a - xVector **2) ** .5)
                     elif yVector > 0:
-                        dy = (2-dx**2)**.5
+                        dy = (2 / a - xVector **2) ** .5
                     self.translate(self.x + dx, self.y + dy, self.z + dz)
 
     def translate(self, x, y, z):
