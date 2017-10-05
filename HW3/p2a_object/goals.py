@@ -6,13 +6,30 @@ class MovementGoal(object):
     def hasBeenReached(self, x,y, z):
         return abs(self.x - x) <= 1 and abs(self.z - z) <= 1
 
+class WaitGoal(object):
+    def __init__(self,time):
+        self.time = time
+    def hasBeenReached(self, time):
+        return time >= self.time
+
 class SlideGoal(object):
-    def __init__(self, x,y,z):
+    def __init__(self, x,y,z,speed=2):
         self.x = x
         self.y = y
         self.z = z
+        self.speed = speed
+        if speed > 3.6:
+            speed = 3.
     def hasBeenReached(self, x,y,z):
-        return abs(self.x - x) <= 2 and abs(self.z - z) <= 2 and abs(self.y - y) <= 2
+        return abs(self.x - x) <= self.speed and abs(self.z - z) <= self.speed and abs(self.y - y) <= self.speed
+
+class EquationGoal(object):
+    def __init__(self, yFunc, xGoal):
+        self.func = yFunc
+        self.xGoal = xGoal
+    def hasBeenReached(self, x):
+        return x>=self.xGoal
+    
 
 class CascadingGoal(object):
     def __init__(self, obj, goal):

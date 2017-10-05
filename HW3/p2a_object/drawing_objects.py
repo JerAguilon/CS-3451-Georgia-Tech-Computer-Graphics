@@ -1,11 +1,40 @@
 from goals import *
 
-class Light(object):
-    def __init__(self, x, y, z):
+class Sleigh(object):
+    def __init__(self, x,y,z, sleigh):
         self.x = x
         self.y = y
         self.z = z
+        self.rx = PI
+        self.ry = PI / 2
+        self.rz = 0
+        self.sleigh = sleigh
+        self.goals = []
+        self.goalIndex = 0
+        self.prevX = None
+        self.prevY = None
+    def disp(self, time):
+        noStroke()
+        specular (180, 180, 180)
+        pushMatrix()
+        translate(self.x,self.y,self.z)
+        scale(10, 10, 10)
+        rotateZ(self.rz)
+        rotateX(self.rx)
+        rotateY(self.ry)
+        shape(self.sleigh) 
+        popMatrix()
     def translate(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+    def rotate(self, rx, ry, rz):
+        self.rx = rx
+        self.ry = ry
+        self.rz = rz
+    
+class Light(object):
+    def __init__(self, x, y, z):
         self.x = x
         self.y = y
         self.z = z
@@ -27,7 +56,6 @@ class Light(object):
         translate(self.x, self.y - 5, self.z)
         sphere(4)
         popMatrix()
-
     
 class Camera(object):
     
@@ -45,9 +73,20 @@ class Camera(object):
         # self.setEye(200, 100, 500)
         # self.setCenter(200, 100, 0)
         # return
-        if time <= 4:
-            self.setEye(time * 30, 0, 150)
+        if time <=2:
+            self.setEye(time * 50, 0, 150)
             self.setCenter(time*30, 0, 0)
+        elif time<=2.8:
+            self.setEye(100+300*((time-2)/.7), 0, 150+250*((time-2)/1))
+            self.setCenter(60+40*((time-2)/1), 80*((time-2)/1), -60*((time-2)/1))
+        elif time <= 3.5:
+            pass
+        elif time <= 4.5:
+            self.setEye(200,100, 300)
+            self.setCenter(500,100,-30)
+        else:
+            self.setEye(650,160, -45)
+            self.setCenter(100,170,-45)
     def setEye(self, x, y, z):
         self.ex = x
         self.ey = y
@@ -73,11 +112,31 @@ class Frosty(object):
         self.rz = 0
         self.goals = []
         self.goalIndex = 0
+        self.prevX = None
+        self.prevY = None
     def goalsMet(self):
         return self.goalIndex == len(self.goals)    
     def addGoal(self, goal):
         self.goals.append(goal)
-    def manipulate(self, time):
+    def manipulate(self, time, sleigh):
+        if keyPressed == True and key == 'w':
+            self.translate(self.x, self.y - 2, self.z)
+            print("{} {}".format(self.x, self.y))
+            return
+        elif keyPressed == True and key == 'a':
+            self.translate(self.x-2, self.y, self.z)
+            print("{} {}".format(self.x, self.y))
+            return
+        elif keyPressed == True and key == 's':
+            self.translate(self.x, self.y +2, self.z)
+            print("{} {}".format(self.x, self.y))
+            return
+        elif keyPressed == True and key == 'd':
+            self.translate(self.x+2, self.y, self.z)
+            print("{} {}".format(self.x, self.y))
+            return
+        
+        
         if len(self.goals) > 0 and self.goalIndex < len(self.goals):
             goal = self.goals[self.goalIndex]
             if type(goal) is MovementGoal:
@@ -114,8 +173,6 @@ class Frosty(object):
                         self.translate(self.x + dx, 55 - abs(sin(time * 7) * 8), self.z + dz)
                         self.rotate(0, angle, sin(time * 7) / 5)
             elif type(goal) is RotationGoal:
-                import random
-                print(random.randint(1,20))
                 if goal.hasBeenReached(self.rx, self.ry, self.rz):
                     self.goalIndex += 1
                     return
@@ -127,6 +184,10 @@ class Frosty(object):
                         self.rotate(0, self.ry + .2, 0)
                     else:
                         self.rotate(0, self.ry - .2, 0)
+            elif type(goal) is CascadingGoal:
+                if goal.hasBeenReached():
+                    self.goalIndex += 1
+                    return
             elif type(goal) is SlideGoal:
                 if goal.hasBeenReached(self.x,self.y, self.z):
                     self.goalIndex += 1
@@ -137,22 +198,47 @@ class Frosty(object):
                     yVector = goal.y - self.y
                     zVector = goal.z - self.z
                     
-                    a = 2 / (xVector**2 + yVector**2)
+                    sqX = xVector ** 2
+                    sqY = yVector ** 2
+                    
+                    a = sqX + sqY
                     
                     dx = 0
                     dy = 0
                     dz = 0
-                    
+                          
                     if xVector < 0:
-                        dx = -((2 / a - yVector **2) ** .5)
+                        dx = -((goal.speed - float(2/a)*sqY))**.5
                     elif xVector > 0:
-                        dx = (2 / a - yVector **2) ** .5
+                        dx =  ((goal.speed - float(2/a)*sqY))**.5
                     if yVector < 0:
-                        dy = -((2 / a - xVector **2) ** .5)
+                        dy =  -((goal.speed - float(2/a)*sqX))**.5
                     elif yVector > 0:
-                        dy = (2 / a - xVector **2) ** .5
+                        dy =  ((goal.speed - float(2/a)*sqX))**.5
+                    print("DY {}".format(dy))
                     self.translate(self.x + dx, self.y + dy, self.z + dz)
+            elif type(goal) is EquationGoal:
+                if goal.hasBeenReached(self.x):
+                    self.goalIndex += 1
+                else:
+                    x = self.x
+                    y = goal.func(self.x)
+                    
+                    zRotation = 0
+                    
+                    if self.prevX is not None and self.prevY is not None:
+                        yVector = (x - self.prevX)
+                        xVector = -(y - self.prevY)
+                        vLength = (xVector ** 2 + yVector ** 2)**.5
+                        zRotation = - PI / 2 + acos(xVector*1/vLength)
+                    self.translate(x, y, self.z)
+                    self.rotate(self.rx,self.ry,zRotation)
+                    sleigh.translate(x,y+10,self.z)
+                    sleigh.rotate(sleigh.rx,sleigh.ry,zRotation)
 
+                    self.prevX = x
+                    self.prevY = y
+                    self.x += 2
     def translate(self, x, y, z):
         self.x = x
         self.y = y
@@ -162,14 +248,14 @@ class Frosty(object):
         self.rz = z
         self.ry = y
         self.rx = x
-    def disp(self, time):
-        self.manipulate(time)
+    def disp(self, time, sleigh):
+        self.manipulate(time, sleigh)
         pushMatrix()
         translate(self.x, self.y, self.z);
         scale(.7, .7, .7)
+        rotateZ(self.rz)
         rotateX(self.rx)
         rotateY(self.ry)
-        rotateZ(self.rz)
         self.makeSnowman()
         popMatrix()
     def makeSnowman(self):
