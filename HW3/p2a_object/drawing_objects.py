@@ -1,43 +1,17 @@
 from goals import *
 
-class AnimationObject(object):
-    def __init__(self):
-        pass
 class Light(object):
     def __init__(self, x, y, z):
         self.x = x
         self.y = y
         self.z = z
-        self.goals = []
-        self.goalIndex = 0
-    def goalsMet(self):
-        return self.goalIndex == len(self.goals)    
-    def addGoal(self, goal):
-        self.goals.append(goal)
-    def manipulate(self, time):
-        print(self.goals)
-        if len(self.goals) > 0 and self.goalIndex < len(self.goals):
-            goal = self.goals[self.goalIndex]
-            if goal.hasBeenReached(self.x, self.y, self.z):
-                self.goalIndex += 1
-                return
-            else:
-                yVector = self.y - goal.y
-                dy = 0
-                if yVector > .05:
-                    dy = -2
-                elif yVector < -.05:
-                    dy = 2
-                self.translate(self.x, self.y + dy, self.z)
     def translate(self, x, y, z):
         self.x = x
         self.y = y
         self.z = z
     def disp(self, time):
-        self.manipulate(time)
         _red = (255,0,0)
-        _green = (0,255,0)
-        
+        _green = (0,255,0)        
         for i in range(10):
             fill(*(_red if i % 2 == 0 else _green))
             pushMatrix()
@@ -68,12 +42,12 @@ class Camera(object):
         self.uy = 0
         self.uz = 0
     def manipulate(self, time):
-        self.setEye(200, -40, 500)
-        self.setCenter(200, -40, 0)
-        return
+        # self.setEye(200, 100, 500)
+        # self.setCenter(200, 100, 0)
+        # return
         if time <= 4:
             self.setEye(time * 30, 0, 150)
-            self.setCenter(0, 0, 0)
+            self.setCenter(time*30, 0, 0)
     def setEye(self, x, y, z):
         self.ex = x
         self.ey = y
@@ -153,10 +127,29 @@ class Frosty(object):
                         self.rotate(0, self.ry + .2, 0)
                     else:
                         self.rotate(0, self.ry - .2, 0)
-            else:
-                if goal.hasBeenReached():
+            elif type(goal) is SlideGoal:
+                if goal.hasBeenReached(self.x,self.y, self.z):
                     self.goalIndex += 1
+                    self.rotate(0, self.ry, 0)
                     return
+                else:
+                    xVector = goal.x - self.x
+                    yVector = goal.y - self.y
+                    zVector = goal.z - self.z
+                    
+                    dx = 0
+                    dy = 0
+                    dz = 0
+                    
+                    if xVector < 0:
+                        dx = -(2 - dy**2)**.5
+                    elif xVector > 0:
+                        dx = (2 - dy**2)**.5
+                    if yVector < 0:
+                        dy = -(2 - dx**2)**.5
+                    elif yVector > 0:
+                        dy = (2-dx**2)**.5
+                    self.translate(self.x + dx, self.y + dy, self.z + dz)
 
     def translate(self, x, y, z):
         self.x = x
