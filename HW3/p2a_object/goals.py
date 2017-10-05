@@ -4,7 +4,7 @@ class MovementGoal(object):
         self.y = y
         self.z = z
     def hasBeenReached(self, x,y, z):
-        return abs(self.x - x) < 1 and abs(self.z - z) < 1 and abs(self.y - y) < 1
+        return abs(self.x - x) <= 1 and abs(self.z - z) <= 1
     
 class CascadingGoal(object):
     def __init__(self, obj, goal):

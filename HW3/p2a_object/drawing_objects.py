@@ -130,13 +130,13 @@ class Frosty(object):
                         dx = 0
                         dz = 0
                         if xVector < 0:
-                            dx = -.5
+                            dx = -1
                         elif xVector > 0:
-                            dx = .5
+                            dx = 1
                         if zVector < 0:
-                            dz = -.5
+                            dz = -1
                         elif zVector > 0:
-                            dz = .5
+                            dz = 1
                         self.translate(self.x + dx, 55 - abs(sin(time * 7) * 8), self.z + dz)
                         self.rotate(0, angle, sin(time * 7) / 5)
             elif type(goal) is RotationGoal:
