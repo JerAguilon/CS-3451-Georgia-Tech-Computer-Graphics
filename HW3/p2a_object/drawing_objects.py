@@ -47,9 +47,8 @@ class Light(object):
             popMatrix()
         fill(255, 255, 0, 150)
         pushMatrix()
-        #ambientLight(247,255,192, self.x,self.y,self.z)
         #pointLight(247,255,192, self.x, self.y, self.z)
-        pointLight(247,255,192, self.x, -7, 0)
+        #pointLight(247,255,192, self.x, -7, 0)
 
         translate(self.x, self.y - 5, self.z)
         sphere(4)
@@ -69,9 +68,12 @@ class Camera(object):
         self.uy = 0
         self.uz = 0
     def manipulate(self, time):
+        self.setEye(200, -40, 500)
+        self.setCenter(200, -40, 0)
+        return
         if time <= 4:
             self.setEye(time * 30, 0, 150)
-            self.setCenter(time * 30, 0, 0)
+            self.setCenter(0, 0, 0)
     def setEye(self, x, y, z):
         self.ex = x
         self.ey = y
