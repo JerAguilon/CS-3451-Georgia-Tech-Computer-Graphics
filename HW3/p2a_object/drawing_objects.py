@@ -71,7 +71,7 @@ class Camera(object):
         # self.setEye(200, 50, 500)
         # self.setCenter(200, 50, 0)
         # return
-        if time <=2:
+        if time <=2.52:
             self.setEye(time * 50, 0, 150)
             self.setCenter(time*30, 0, 0)
         elif time<=3.6:
@@ -80,9 +80,11 @@ class Camera(object):
         elif time <= 4.3:
             self.setEye(200,100, 300)
             self.setCenter(500,100,-30)
-        else:
+        elif time <= 6.2:
             self.setEye(650,160, -45)
             self.setCenter(100,170,-45)
+        else:
+            exit()
     def setEye(self, x, y, z):
         self.ex = x
         self.ey = y
@@ -140,7 +142,7 @@ class Frosty(object):
                 if goal.hasBeenReached(self.x,self.y, self.z):
                     self.goalIndex += 1
                     self.rotate(0, self.ry, 0)
-                    self.translate(self.x, 55, self.z)
+                    self.translate(self.x, goal.base, self.z)
                     return
                 else:
                     xVector = goal.x - self.x
@@ -167,7 +169,7 @@ class Frosty(object):
                             dz = -1
                         elif zVector > 0:
                             dz = 1
-                        self.translate(self.x + dx, 55 - abs(sin(time * 7) * 8), self.z + dz)
+                        self.translate(self.x + dx, goal.base - abs(sin(time * 7) * 8), self.z + dz)
                         self.rotate(0, angle, sin(time * 7) / 5)
             elif type(goal) is RotationGoal:
                 if goal.hasBeenReached(self.rx, self.ry, self.rz):
@@ -176,7 +178,6 @@ class Frosty(object):
                 else:
                     rotation = self.ry
                     diff = rotation - goal.ry
-                    print("{} {} --> {}".format(rotation, self.ry, diff))
                     if diff < 0:
                         self.rotate(0, self.ry + .2, 0)
                     else:
@@ -204,7 +205,12 @@ class Frosty(object):
                     self.prevY = y
                     self.x += 2
             elif type(goal) is WiggleGoal:
-                print("WIGGLING")
+                if goal.startTime == None:
+                    goal.startTime = time
+                else:
+                    print(time-goal.startTime)
+                    if time - goal.startTime >= goal.duration:
+                        self.goalIndex += 1
                 self.wiggle = True
     def translate(self, x, y, z):
         self.x = x

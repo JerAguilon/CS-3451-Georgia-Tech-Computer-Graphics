@@ -36,7 +36,8 @@ def setup():
     frosty.addGoal(equationGoal)
     frosty.addGoal(EquationGoal(lambda x: 0.0104012619541*x**2 -9.16020901114*x+2145.59198462, 490))
     frosty.addGoal(EquationGoal(lambda x: -0.00489104824426*x**2+5.44256674412*x-1340.16146959, 575))
-    frosty.addGoal(WiggleGoal())
+    frosty.addGoal(WiggleGoal(.3))
+    frosty.addGoal(MovementGoal(577,173,100, base=173))
     cam = Camera()
     cam.setEye(0, 0, 100)
     cam.setUp(0,1,0)
@@ -51,23 +52,26 @@ def walkingUp(time):
     global scene
     global igloo, sleigh
 
-    background (150, 150, 150)  # clear screen and set background to white
+    background (150, 150, 150)
     
     ambientLight(50, 50, 50);
-    pointLight(255, 255, 255, 20, -40, 40);
-    directionalLight (255, 255, 255, 0, 10, 35)
+    
+    # *** LIGHT SOURCE ***
+    pointLight(255, 255, 255, 20, -300, -400);
+    fill(255, 255, 204)
+    pushMatrix()
+    translate(20,-300,-400)
+    sphere(30)
+    popMatrix()
+    
     for christmasLight in christmasLights:
         christmasLight.disp(time) 
-
-    #ightSpecular(255, 255, 255)
-    #directionalLight (100, 100, 100, -0.3, 0.5, -1)
-   
       
     noStroke()
     specular (180, 180, 180)
     pushMatrix()
     translate(270,220,-200)
-    scale(2, 2,2)
+    scale(2, 2,3.5)
     rotateX(PI/2)
     shape(scene) 
     popMatrix()

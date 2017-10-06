@@ -1,8 +1,9 @@
 class MovementGoal(object):
-    def __init__(self, x,y, z):
+    def __init__(self, x,y, z, base=55):
         self.x = x
         self.y = y
         self.z = z
+        self.base = base
     def hasBeenReached(self, x,y, z):
         return abs(self.x - x) <= 1 and abs(self.z - z) <= 1
 
@@ -15,7 +16,9 @@ class EquationGoal(object):
 
 # dummy class, doesn't need any business logic
 class WiggleGoal(object):
-    def __init__(self):
+    def __init__(self, duration):
+        self.duration = duration
+        self.startTime = None
         pass
     
 class RotationGoal(object):
