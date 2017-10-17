@@ -1,4 +1,4 @@
- # Jeremy Aguilon
+# Jeremy Aguilon
 from drawing_objects import Frosty, Light, Camera, Sleigh
 from goals import *
 
@@ -13,6 +13,8 @@ sleigh = None
 scene = None
 cam = Camera()
 frosty = Frosty()
+
+# ****INSTANCING AN OBJECT MULTIPLE TIMES****
 christmasLights = [Light(90, 45, -30), Light(90, 45, -60), Light(575,160,-25),Light(575,160,-65)]
 
 def setup():
@@ -27,14 +29,15 @@ def setup():
     frosty.addGoal(MovementGoal(85, 55, 20))
     frosty.addGoal(MovementGoal(100, 55, -45))
     frosty.addGoal(RotationGoal(0, PI/2, 0))
-    frosty.addGoal(MovementGoal(128, 60, -45))
+    frosty.addGoal(EquationGoal(lambda x: 0.0101351351351*x**2 -2.15878378378*x+169.527027027, 140))
     equationGoal = EquationGoal(
-        lambda x: 664.4103 - 9.587755*x + 0.03606822*(x**2) + 0.00007670587*(x**3) - 5.681288e-7*(x**4) + 7.060634e-10*(x**5),
+        lambda x: 657.4103 - 9.587755*x + 0.03606822*(x**2) + 0.00007670587*(x**3) - 5.681288e-7*(x**4) + 7.060634e-10*(x**5),
         363)
     frosty.addGoal(equationGoal)
     frosty.addGoal(EquationGoal(lambda x: 0.0104012619541*x**2 -9.16020901114*x+2145.59198462, 490))
     frosty.addGoal(EquationGoal(lambda x: -0.00489104824426*x**2+5.44256674412*x-1340.16146959, 575))
-    print("FROSTY {}".format(frosty))
+    frosty.addGoal(WiggleGoal(.3))
+    frosty.addGoal(MovementGoal(577,173,100, base=173))
     cam = Camera()
     cam.setEye(0, 0, 100)
     cam.setUp(0,1,0)
@@ -49,29 +52,26 @@ def walkingUp(time):
     global scene
     global igloo, sleigh
 
-    background (150, 150, 150)  # clear screen and set background to white
+    background (150, 150, 150)
     
     ambientLight(50, 50, 50);
-   # lightSpecular(255, 255, 255)
-    #pointLight(255, 255, 255, 0, 40, 36);
-    pointLight(255, 255, 255, 20, -40, 40);
-    #pointLight(255, 255, 255, -10, -10, 10);
-    #pointLight(255, 255, 255, -20, 40, 30);
-    directionalLight (255, 255, 255, 0, 10, 35)
-    #directionalLight (255, 255, 255, 40 - 25 * time, -5, 10)
-    #lightSpecular(255, 255, 255)   
+    
+    # *** LIGHT SOURCE ***
+    pointLight(255, 255, 255, 20, -300, -400);
+    fill(255, 255, 204)
+    pushMatrix()
+    translate(20,-300,-400)
+    sphere(30)
+    popMatrix()
+    
     for christmasLight in christmasLights:
         christmasLight.disp(time) 
-
-    #ightSpecular(255, 255, 255)
-    #directionalLight (100, 100, 100, -0.3, 0.5, -1)
-   
       
     noStroke()
     specular (180, 180, 180)
     pushMatrix()
     translate(270,220,-200)
-    scale(2, 2,2)
+    scale(2, 2,3.5)
     rotateX(PI/2)
     shape(scene) 
     popMatrix()
