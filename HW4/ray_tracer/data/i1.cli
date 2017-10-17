@@ -1,0 +1,9 @@
+# one diffuse red sphere
+
+fov 60
+light 0 0 5 1 1 1
+
+surface   0.4 0.1 0.1   0 0.2 0   0 0 0   1  0
+sphere  1 0 0 -4
+
+write i1.png
