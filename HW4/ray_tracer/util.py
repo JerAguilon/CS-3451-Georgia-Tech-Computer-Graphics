@@ -40,5 +40,9 @@ class Ray(object):
         return Vertex(x,y,z)
     
 class Sphere(object):
-    def __init__(self, r, x, y, z):
-        pass
+    def __init__(self, r, v, cdr, cdg, cdb):
+        self.v = v
+        self.r = r
+        self.cdr = cdr
+        self.cdg = cdg
+        self.cdb = cdb
