@@ -3,6 +3,12 @@
 # The most important part of this code is the interpreter, which will
 # help you parse the scene description (.cli) files.
 
+shapes = []
+lightSources = []
+backgroundColor = (0,0,0)
+diffuseColor = (0,0,0)
+fov = 0
+
 def setup():
     size(500, 500) 
     noStroke()
@@ -31,6 +37,8 @@ def keyPressed():
         interpreter("i9.cli")
 
 def interpreter(fname):
+    global shapes, lightSources, backgroundColor, diffuseColor, fov
+    
     fname = "data/" + fname
     # read in the lines of a file
     with open(fname) as f:
@@ -46,15 +54,36 @@ def interpreter(fname):
             x = float(words[2])
             y = float(words[3])
             z = float(words[4])
+            Vector v = Vector(x,y,z)
+            shapes.append(Sphere(radius, v))
             # call your sphere creation routine here
             # for example: create_sphere(radius,x,y,z)
         elif words[0] == 'fov':
+            fov = float(words[1])
             pass
         elif words[0] == 'background':
+            r = float(words[1])
+            g = float(words[2])
+            b = float(words[3])
+            backgroundColor = (r,g,b)
             pass
         elif words[0] == 'light':
+            x = float(words[1])
+            y = float(words[2])
+            z = float(words[3])
+            r = float(words[4])
+            g = float(words[5])
+            b = float(words[6])
+            v = Vector(x,y,z)
+            
+            light = LightSource(v,r,g,b)
+            lightSources.append(light)
             pass
         elif words[0] == 'surface':
+            dr = float(words[1])
+            dg = float(words[2])
+            db = float(words[3])
+            diffuseColor = (dr,dg,db)
             pass
         elif words[0] == 'begin':
             pass

@@ -48,7 +48,7 @@ class Ray(object):
 
 class Sphere(object):
 
-    def __init__(self, r, v, cdr, cdg, cdb):
+    def __init__(self, r, v):
         self.v = v
         self.r = r
         self.cdr = cdr
