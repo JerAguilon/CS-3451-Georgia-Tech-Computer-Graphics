@@ -1,28 +1,33 @@
 class Vertex(object):
-    def __init__(self,x,y,z):
+
+    def __init__(self, x, y, z):
         self.x = x
         self.y = y
         self.z = z
-    
+
     def distance(self, v):
-        return sqrt( (v.x - self.x)**2 + (v.y - self.y)**2 + (v.z - self.z)**2)    
-    
-    def subtract(self, v):
+        return sqrt((v.x - self.x) ** 2 + (v.y - self.y) ** 2 + (v.z - self.z) ** 2)
+
+    def __sub__(self, v):
         return Vertex(self.x - v.x, self.y - v.y, self.z - v.z)
 
     def dotProduct(self, v):
         return self.x * v.x + self.y * v.y + self.z * v.z
-    
-    def crossProduct(self, v):
-        x = self.y * v.z - self.z * v.y
-        y = self.z * v.x - self.x*v.z
-        z = self.x*v.y - self.y*v.x
-        return Vertex(x,y,z)
-    
-    def __len__(self):
-        return sqrt( (self.x)**2 + (self.y)**2 + (self.z)**2) 
 
+    def __mul__(self, v):
+        x = self.y * v.z - self.z * v.y
+        y = self.z * v.x - self.x * v.z
+        z = self.x * v.y - self.y * v.x
+        return Vertex(x, y, z)
+
+    def __len__(self):
+        return sqrt((self.x) ** 2 + (self.y) ** 2 + (self.z) ** 2)
+    
+    def normalize(self):
+        vLength = self.__len__()
+        return Vertex(self.x / vLength, self.y / vLength, self.z / vLength)
 class LightSource(object):
+
     def __init__(self, v, r, g, b):
         self.v = v
         self.r = r
@@ -30,19 +35,39 @@ class LightSource(object):
         self.b = b
 
 class Ray(object):
+
     def __init__(self, origin, slope):
         self.origin = origin
         self.slope = slope
+
     def getLocation(self, time):
-        x = self.origin.x + t*self.slope.x
-        y = self.origin.y + t*self.slope.y
-        z = self.origin.z + t*self.slope.z
-        return Vertex(x,y,z)
-    
+        x = self.origin.x + t * self.slope.x
+        y = self.origin.y + t * self.slope.y
+        z = self.origin.z + t * self.slope.z
+        return Vertex(x, y, z)
+
 class Sphere(object):
+
     def __init__(self, r, v, cdr, cdg, cdb):
         self.v = v
         self.r = r
         self.cdr = cdr
         self.cdg = cdg
         self.cdb = cdb
+        
+    def getIntersect(ray):
+        A = ray.slope.dotProduct(ray.slope)
+        B = 2 * ( (ray.origin - self.v).dotProduct(ray.slope))
+        C = (ray.origin - self.v).dotProduct(ray.origin - self.v) - self.r**2
+        discriminant = B**2 - 4*A*C
+        
+        if discriminant < 0:
+            return None
+        closestSol = min(-B+sqrt(discriminant)/(2*A), -B-sqrt(discriminant)/(2*A))
+        if closestSol < -.0001:
+            return None
+        else:
+            return ray.getLocation(closestSol)
+    def getNormalVector(v):
+        return (v - self.loc).normalize()
+    
