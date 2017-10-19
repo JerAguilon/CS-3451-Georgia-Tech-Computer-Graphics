@@ -9,6 +9,7 @@ shapes = []
 lightSources = []
 backgroundColor = (0,0,0)
 diffuseColor = (0,0,0)
+p = 0
 fov = 0
 
 def setup():
@@ -58,7 +59,7 @@ def interpreter(fname):
             y = float(words[3])
             z = float(words[4])
             v = Vertex(x,y,z)
-            shapes.append(Sphere(radius, v))
+            shapes.append(Sphere(radius, v, diffuseColor[0], diffuseColor[1], diffuseColor[2], p))
             # call your sphere creation routine here
             # for example: create_sphere(radius,x,y,z)
         elif words[0] == 'fov':
@@ -97,6 +98,11 @@ def interpreter(fname):
         elif words[0] == 'write':
             render_scene()    # render the scene
             save(words[1])  # write the image to a file
+            shapes = []
+            lightSources = []
+            backgroundColor = (0,0,0)
+            diffuseColor = (0,0,0)
+            fov = 0
             pass
 
 # render the ray tracing scene
@@ -104,8 +110,9 @@ def render_scene():
     print(fov)
     k = tan(radians(fov/2))
     for j in range(height):
+        print(j)
         for i in range(width):
-            transY = (j - height / 2) * k / (height / 2)
+            transY = -(j - height / 2) * k / (height / 2)
             transX = (i - width / 2) * k / (width / 2)
             v1 = Vertex(0,0,0)
             v2 = Vertex(transX, transY, -1)
@@ -117,19 +124,48 @@ def render_scene():
                 curr = s.getIntersect(ray)
                 if curr != None:
                     distance = curr.distance(ray.origin)
-                    candidates.append((distance, curr))
-            bestPoint = min(candidates) if len(candidates) > 0 else None
-            
-            if bestPoint is None:
+                    candidates.append((distance, curr, s))
+            if len(candidates) == 0:
                 pix_color = color(*backgroundColor)
                 set(i,j, pix_color)
             else:
-                pix_color = color(0,0,0)
+                bestPoint, s = min(candidates)[1:3]
+                pix_color = color(*getColor(ray, s, bestPoint))
                 set(i,j,pix_color)
             continue
             # create an eye ray for pixel (i,j) and cast it into the scene
             pix_color = color(0.8, 0.2, 0.4)  # you should calculate the correct pixel color here
             set (i, j, pix_color)         # fill the pixel with the calculated color
+    pass
+
+def getColor(ray, s, bestPoint):
+    normVector = s.getNormalVector(bestPoint)
+    
+    redV = 0
+    greenV = 0
+    blueV = 0
+    
+    for light in lightSources:
+        lightRay = Ray(bestPoint, light.v - bestPoint)
+        lightPoint = None
+        for s in shapes:
+            currPoint = s.getIntersect(lightRay)
+            if currPoint != None:
+                print(currPoint)
+                if lightPoint == None or \
+                        currPoint.distance(lightRay.origin) < bestPoint.distance(ray.origin):
+                    lightPoint = currPoint
+        if lightPoint == None or lightPoint.distance(lightRay.origin) > light.v.distance(lightRay.origin):
+            val = lightRay.slope.length() * normVector.length()
+            costheta = abs(lightRay.slope.dotProduct(normVector) / (val))
+            redV += costheta * s.red * light.r
+            greenV += costheta * s.green * light.g
+            blueV += costheta * s.blue * light.b
+        
+                
+    output = (redV, greenV, blueV)
+    print(output)
+    return output
     pass
 
 # should remain empty for this assignment

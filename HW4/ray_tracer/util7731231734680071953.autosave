@@ -4,9 +4,6 @@ class Vertex(object):
         self.x = x
         self.y = y
         self.z = z
-        
-    def __repr__(self):
-        return "{} {} {}".format(self.x, self.y, self.z)
     def scale(self, n):
         return Vertex(self.x * n, self.y * n, self.z * n)
 
@@ -25,13 +22,11 @@ class Vertex(object):
         z = self.x * v.y - self.y * v.x
         return Vertex(x, y, z)
 
-    def length(self):
-        pre = (self.x) ** 2 + (self.y) ** 2 + (self.z) ** 2
-        post = sqrt(pre)
-        return post
+    def __len__(self):
+        return sqrt((self.x) ** 2 + (self.y) ** 2 + (self.z) ** 2)
     
     def normalize(self):
-        vLength = self.length()
+        vLength = self.__len__()
         return Vertex(self.x / vLength, self.y / vLength, self.z / vLength)
 class LightSource(object):
 
@@ -55,12 +50,10 @@ class Ray(object):
 
 class Sphere(object):
 
-    def __init__(self, r, v,red,green,blue,p):
+    def __init__(self, r, v, diffuseColor, p):
+        print(diffuseColor)
         self.v = v
         self.r = r
-        self.red = red
-        self.green = green
-        self.blue = blue
         self.p = p
         
     def getIntersect(self, ray):
@@ -77,5 +70,5 @@ class Sphere(object):
         else:
             return ray.getLocation(closestSol)
     def getNormalVector(self, v):
-        return (v - self.v).scale(-1).normalize()
+        return (v - self.v).normalize()
     
