@@ -62,20 +62,19 @@ class Sphere(object):
         self.green = green
         self.blue = blue
         self.p = p
+    def __repr__(self):
+        return "v: {} r: {}".format(self.v, self.r)
         
     def getIntersect(self, ray):
         A = ray.slope.dotProduct(ray.slope)
         B = 2 * ( (ray.origin - self.v).dotProduct(ray.slope))
         C = (ray.origin - self.v).dotProduct(ray.origin - self.v) - self.r**2
-        discriminant = B**2 - 4*A*C
-        
+        discriminant = B*B - 4*A*C
+        #print(discriminant)
         if discriminant < 0:
             return None
-        closestSol = min(-B+sqrt(discriminant)/(2*A), -B-sqrt(discriminant)/(2*A))
-        if closestSol < -.0001:
-            return None
-        else:
-            return ray.getLocation(closestSol)
-    def getNormalVector(self, v):
-        return (v - self.v).normalize()
+        candidates = [(-B+sqrt(discriminant))/(2*A), (-B-sqrt(discriminant))/(2*A)]
+        closestSol = min(candidates)
+        #print("A: {} B: {} C: {} SOL: {}".format(A,B,C, closestSol))
+        return ray.getLocation(closestSol)
     

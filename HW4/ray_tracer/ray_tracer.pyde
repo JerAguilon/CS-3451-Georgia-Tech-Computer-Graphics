@@ -111,13 +111,14 @@ def render_scene():
     k = tan(radians(fov/2))
     for j in range(height):
         for i in range(width):
-            transY = (j - height / 2) * k / (height / 2)
-            transX = (i - width / 2) * k / (width / 2)
+            transY = (j - height / 2) * 2*k / (height)
+            transX = (i - width / 2) * 2*k / (width)
             v1 = Vertex(0,0,0)
             v2 = Vertex(transX, transY, -1)
             
             ray = Ray(v1, v2)
             candidates = []
+            #print(shapes)
             for s in shapes:
                 curr = s.getIntersect(ray)
                 if curr != None:
@@ -127,8 +128,10 @@ def render_scene():
                 pix_color = color(*backgroundColor)
                 set(i,height-j, pix_color)
             else:
+                #print(candidates)
                 bestPoint, s = min(candidates)[1:3]
-                pix_color = color(*getColor(ray, s, bestPoint))
+                pixColor = getColor(ray, s, bestPoint)
+                pix_color = color(*pixColor)
                 set(i,height-j,pix_color)
             continue
             # create an eye ray for pixel (i,j) and cast it into the scene
@@ -137,16 +140,31 @@ def render_scene():
     pass
 
 def getColor(ray, s, bestPoint):
-    normVector = s.getNormalVector(bestPoint)
+    #print(bestPoint)
+    # color1 = (.5, .5, .5)
+    # color0 = (.1,.9,.4)
+    # color2 = (.6,.2,.1)
+    # color3 = (.1,.2,.4)
+    # test = int(bestPoint.z) % 4
+    
+    # if test == 0:
+    #     return color0
+    # elif test == 1:
+    #     return color1
+    # elif test == 2: 
+    #     return color2
+    # elif test == 3:
+    #     return color3
+    
+    normVector = (bestPoint - s.v).normalize()
     
     redV = 0
     greenV = 0
     blueV = 0
     
     for light in lightSources:
-        lightVector = (bestPoint - light.v).normalize()
+        lightVector = (light.v - bestPoint).normalize()
         proportion = max(normVector.dotProduct(lightVector),0)
-        print(proportion)
         redV += s.red * light.r * proportion
         greenV += s.green * light.g * proportion
         blueV += s.blue * light.b * proportion
