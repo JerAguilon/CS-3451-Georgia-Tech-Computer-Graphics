@@ -40,7 +40,7 @@ class Ray(object):
         self.origin = origin
         self.slope = slope
 
-    def getLocation(self, time):
+    def getLocation(self, t):
         x = self.origin.x + t * self.slope.x
         y = self.origin.y + t * self.slope.y
         z = self.origin.z + t * self.slope.z
@@ -51,11 +51,8 @@ class Sphere(object):
     def __init__(self, r, v):
         self.v = v
         self.r = r
-        self.cdr = cdr
-        self.cdg = cdg
-        self.cdb = cdb
         
-    def getIntersect(ray):
+    def getIntersect(self, ray):
         A = ray.slope.dotProduct(ray.slope)
         B = 2 * ( (ray.origin - self.v).dotProduct(ray.slope))
         C = (ray.origin - self.v).dotProduct(ray.origin - self.v) - self.r**2

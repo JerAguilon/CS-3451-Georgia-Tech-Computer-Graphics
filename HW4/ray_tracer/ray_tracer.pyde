@@ -2,6 +2,8 @@
 #
 # The most important part of this code is the interpreter, which will
 # help you parse the scene description (.cli) files.
+from util import *
+
 
 shapes = []
 lightSources = []
@@ -50,11 +52,12 @@ def interpreter(fname):
         if len(words) == 0:   # skip empty lines
             continue
         if words[0] == 'sphere':
+            print("ADDING SPHERE")
             radius = float(words[1])
             x = float(words[2])
             y = float(words[3])
             z = float(words[4])
-            Vector v = Vector(x,y,z)
+            v = Vertex(x,y,z)
             shapes.append(Sphere(radius, v))
             # call your sphere creation routine here
             # for example: create_sphere(radius,x,y,z)
@@ -74,7 +77,7 @@ def interpreter(fname):
             r = float(words[4])
             g = float(words[5])
             b = float(words[6])
-            v = Vector(x,y,z)
+            v = Vertex(x,y,z)
             
             light = LightSource(v,r,g,b)
             lightSources.append(light)
@@ -98,8 +101,32 @@ def interpreter(fname):
 
 # render the ray tracing scene
 def render_scene():
+    print(fov)
+    k = tan(radians(fov/2))
     for j in range(height):
         for i in range(width):
+            transY = (j - height / 2) * k / (height / 2)
+            transX = (i - width / 2) * k / (width / 2)
+            v1 = Vertex(0,0,0)
+            v2 = Vertex(transX, transY, -1)
+            
+            ray = Ray(v1, v2)
+            
+            candidates = []
+            for s in shapes:
+                curr = s.getIntersect(ray)
+                if curr != None:
+                    distance = curr.distance(ray.origin)
+                    candidates.append((distance, curr))
+            bestPoint = min(candidates) if len(candidates) > 0 else None
+            
+            if bestPoint is None:
+                pix_color = color(*backgroundColor)
+                set(i,j, pix_color)
+            else:
+                pix_color = color(0,0,0)
+                set(i,j,pix_color)
+            continue
             # create an eye ray for pixel (i,j) and cast it into the scene
             pix_color = color(0.8, 0.2, 0.4)  # you should calculate the correct pixel color here
             set (i, j, pix_color)         # fill the pixel with the calculated color
