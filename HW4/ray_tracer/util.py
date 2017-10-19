@@ -77,5 +77,5 @@ class Sphere(object):
         else:
             return ray.getLocation(closestSol)
     def getNormalVector(self, v):
-        return (v - self.v).scale(-1).normalize()
+        return (v - self.v).normalize()
     

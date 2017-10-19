@@ -110,13 +110,15 @@ def render_scene():
     print(fov)
     k = tan(radians(fov/2))
     for j in range(height):
+        print(j)
         for i in range(width):
-            transY = (j - height / 2) * k / (height / 2)
+            transY = -(j - height / 2) * k / (height / 2)
             transX = (i - width / 2) * k / (width / 2)
             v1 = Vertex(0,0,0)
             v2 = Vertex(transX, transY, -1)
             
             ray = Ray(v1, v2)
+            
             candidates = []
             for s in shapes:
                 curr = s.getIntersect(ray)
@@ -125,11 +127,11 @@ def render_scene():
                     candidates.append((distance, curr, s))
             if len(candidates) == 0:
                 pix_color = color(*backgroundColor)
-                set(i,height-j, pix_color)
+                set(i,j, pix_color)
             else:
                 bestPoint, s = min(candidates)[1:3]
                 pix_color = color(*getColor(ray, s, bestPoint))
-                set(i,height-j,pix_color)
+                set(i,j,pix_color)
             continue
             # create an eye ray for pixel (i,j) and cast it into the scene
             pix_color = color(0.8, 0.2, 0.4)  # you should calculate the correct pixel color here
@@ -137,38 +139,23 @@ def render_scene():
     pass
 
 def getColor(ray, s, bestPoint):
-    normVector = s.getNormalVector(bestPoint)
+    normVector = s.getNormalVector(bestPoint)bestPoint - 
     
     redV = 0
     greenV = 0
     blueV = 0
     
     for light in lightSources:
-        lightVector = (bestPoint - light.v).normalize()
-        proportion = max(normVector.dotProduct(lightVector),0)
-        print(proportion)
-        redV += s.red * light.r * proportion
-        greenV += s.green * light.g * proportion
-        blueV += s.blue * light.b * proportion
-        continue
-        
-        lightRay = Ray(bestPoint, light.v - bestPoint)
-        lightPoint = None
-        for s in shapes:
-            currPoint = s.getIntersect(lightRay)
-            if currPoint != None:
-                if lightPoint == None or \
-                        currPoint.distance(lightRay.origin) < bestPoint.distance(ray.origin):
-                    lightPoint = currPoint
-        if lightPoint == None or lightPoint.distance(lightRay.origin) > light.v.distance(lightRay.origin):
-            val = lightRay.slope.length() * normVector.length()
-            costheta = abs(lightRay.slope.dotProduct(normVector) / (val))
-            redV += costheta * s.red * light.r
-            greenV += costheta * s.green * light.g
-            blueV += costheta * s.blue * light.b
+        lightRay = Ray(bestPoint, light.v u        lightPoint = None
+        val = lightRay.slope.length() * normVector.length()
+        costheta = abs(lightRay.slope.dotProduct(normVector) / (val))
+ct(lVector)
+        redV += costheta * s.red * light.r
+        greenV += costheta * s.greeue * light.b
         
                 
     output = (redV, greenV, blueV)
+    print(output)
     return output
     pass
 
