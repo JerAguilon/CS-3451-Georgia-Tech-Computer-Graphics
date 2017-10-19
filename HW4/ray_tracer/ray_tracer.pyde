@@ -140,22 +140,6 @@ def render_scene():
     pass
 
 def getColor(ray, s, bestPoint):
-    #print(bestPoint)
-    # color1 = (.5, .5, .5)
-    # color0 = (.1,.9,.4)
-    # color2 = (.6,.2,.1)
-    # color3 = (.1,.2,.4)
-    # test = int(bestPoint.z) % 4
-    
-    # if test == 0:
-    #     return color0
-    # elif test == 1:
-    #     return color1
-    # elif test == 2: 
-    #     return color2
-    # elif test == 3:
-    #     return color3
-    
     normVector = (bestPoint - s.v).normalize()
     
     redV = 0
@@ -168,27 +152,9 @@ def getColor(ray, s, bestPoint):
         redV += s.red * light.r * proportion
         greenV += s.green * light.g * proportion
         blueV += s.blue * light.b * proportion
-        continue
-        
-        lightRay = Ray(bestPoint, light.v - bestPoint)
-        lightPoint = None
-        for s in shapes:
-            currPoint = s.getIntersect(lightRay)
-            if currPoint != None:
-                if lightPoint == None or \
-                        currPoint.distance(lightRay.origin) < bestPoint.distance(ray.origin):
-                    lightPoint = currPoint
-        if lightPoint == None or lightPoint.distance(lightRay.origin) > light.v.distance(lightRay.origin):
-            val = lightRay.slope.length() * normVector.length()
-            costheta = abs(lightRay.slope.dotProduct(normVector) / (val))
-            redV += costheta * s.red * light.r
-            greenV += costheta * s.green * light.g
-            blueV += costheta * s.blue * light.b
-        
-                
+
     output = (redV, greenV, blueV)
     return output
-    pass
 
 # should remain empty for this assignment
 def draw():
