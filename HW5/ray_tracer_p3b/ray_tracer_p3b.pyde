@@ -178,7 +178,7 @@ def getColor(ray, s, bestPoint, currColor):
         normVector = (bestPoint - s.v).normalize()
     else:
         # gotta be a triangle
-        normVector = ((s.b - s.a) * (s.c - s.a)).normalize()
+        normVector = ((s.b - s.a) * (s.c - s.a)).normalize().scale(-1)
     
     # output[i] = ambient[i] + cosineAngle * diffuse[i] * light[i] + [TODO Phong] + krefl[i] * outputNext[i]
     output[0] += s.ar    
@@ -212,9 +212,6 @@ def getColor(ray, s, bestPoint, currColor):
                 if currPoint != None:
                     isCovered = True
         if not isCovered:                      
-            if type(s) is Triangle:
-                if normVector[y] < 0:
-                    normVector = normVector.scale(-1)
             proportion = max(normVector.dotProduct(lightVector), 0)
             output[0] += s.dr * light.r * proportion
             output[1] += s.dg * light.g * proportion
