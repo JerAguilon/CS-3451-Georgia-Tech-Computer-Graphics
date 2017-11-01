@@ -125,6 +125,9 @@ def interpreter(fname):
             lightSources = []
             backgroundColor = (0,0,0)
             diffuseColor = (0,0,0)
+            specularColor = (0,0,0)
+            phong = 0
+            krefl = 0
             fov = 0
             pass
 
@@ -164,51 +167,11 @@ def render_scene():
 
 def getColor(ray, s, bestPoint, currColor):   
     
-    # normVector = (bestPoint - s.v).normalize()
-    
-    # redV = 0
-    # greenV = 0
-    # blueV = 0
-    
-    # for light in lightSources:
-    #     lightVector = (light.v - bestPoint).normalize()
-    #     proportion = max(normVector.dotProduct(lightVector),0)
-    #     currColor[0] += s.dr * light.r * proportion
-    #     currColor[1] += s.dg * light.g * proportion
-    #     currColor[2] += s.db * light.b * proportion
-
-    # return currColor 
+    output = list(currColor)
     normVector = (bestPoint - s.v).normalize()
-    
-    # if s.krefl > 0:    
-    #     normRay = ray.slope.normalize()
-    #     reflectedRay = (normRay.scale(2 * normVector.dotProduct(normRay)) - normRay).scale(-1)
-    #     reflection = Ray(bestPoint, reflectedRay)
-        
-    #     nextShape = None
-    #     nextPoint = None
-    #     bestDist = float('inf')
-    #     for s in shapes:
-    #         currIntersection = s.getIntersect(reflection)
-    #         d = currIntersection.distance(reflection.origin)
-    #         if d < bestDist:
-    #             nextShape = s
-    #             bestDist = d
-    #             nextPoint = currIntersection
-    #     if nextShape != None:
-    #         # copy currColor to instantiate new object
-    #         reflectionColor = getColor(reflection, nextShape, nextPoint, list(currColor))
-    #         currColor[0] += surface.krefl * reflectionColor[0]
-    #         currColor[1] += surface.krefl * reflectionColor[1]
-    #         currColor[2] += surface.krefl * reflectionColor[2]
-    #     else:
-    #         currColor[0] += surface.krefl * backgroundColor[0]
-    #         currColor[1] += surface.krefl * backgroundColor[1]
-    #         currColor[2] += surface.krefl * backgroundColor[2]
-    
-    currColor[0] += s.ar    
-    currColor[1] += s.ag
-    currColor[2] += s.ab
+    output[0] += s.ar    
+    output[1] += s.ag
+    output[2] += s.ab
 
     for light in lightSources:
         lightVector = (light.v - bestPoint).normalize()
@@ -223,11 +186,41 @@ def getColor(ray, s, bestPoint, currColor):
                 overshadowPoint = currPoint
         if overshadowPoint == None:
             proportion = max(normVector.dotProduct(lightVector),0)
-            currColor[0] += s.dr * light.r * proportion
-            currColor[1] += s.dg * light.g * proportion
-            currColor[2] += s.db * light.b * proportion
+            output[0] += s.dr * light.r * proportion
+            output[1] += s.dg * light.g * proportion
+            output[2] += s.db * light.b * proportion
             
             L = lightVector.normalize()
+            
+    if s.krefl > 0:    
+        normRay = ray.slope.normalize()
+        reflectedRay = (normVector.scale(2 * normVector.dotProduct(normRay)) - normRay).scale(-1)
+        reflection = Ray(bestPoint, reflectedRay)
+        
+        nextShape = None
+        nextPoint = None
+        bestDist = float('inf')
+        for currShape in shapes:
+            if currShape != s:
+                currIntersection = currShape.getIntersect(reflection)
+                if currIntersection != None:
+                    d = currIntersection.distance(reflection.origin)
+                    if d < bestDist:
+                        nextShape = currShape
+                        bestDist = d
+                        nextPoint = currIntersection
+        if nextShape != None:
+            # copy currColor to instantiate new object
+            print("RECURSING")
+            reflectionColor = getColor(reflection, nextShape, nextPoint, list(currColor))
+            output[0] += s.krefl * reflectionColor[0]
+            output[1] += s.krefl * reflectionColor[1]
+            output[2] += s.krefl * reflectionColor[2]
+        else:
+            output[0] += s.krefl * backgroundColor[0]
+            output[1] += s.krefl * backgroundColor[1]
+            output[2] += s.krefl * backgroundColor[2]
+    
 
         
     #print("{} {} {}".format(s.ar, s.ag, s.ab))

@@ -88,7 +88,7 @@ class Sphere(object):
         candidates = [(-B+sqrt(discriminant))/(2*A), (-B-sqrt(discriminant))/(2*A)]
         closestSol = min(candidates)
         if closestSol <= 0:
-            print(closestSol)
+            #print(closestSol)
             return None
         
         #print("A: {} B: {} C: {} SOL: {}".format(A,B,C, closestSol))
