@@ -169,6 +169,8 @@ def getColor(ray, s, bestPoint, currColor):
     
     output = list(currColor)
     normVector = (bestPoint - s.v).normalize()
+    
+    # output[i] = ambient[i] + cosineAngle * diffuse[i] * light[i] + [TODO Phong] + krefl[i] * outputNext[i]
     output[0] += s.ar    
     output[1] += s.ag
     output[2] += s.ab
