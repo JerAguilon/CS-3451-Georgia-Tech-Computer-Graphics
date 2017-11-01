@@ -12,7 +12,8 @@ class Vertex(object):
 
     def distance(self, v):
         return sqrt((v.x - self.x) ** 2 + (v.y - self.y) ** 2 + (v.z - self.z) ** 2)
-
+    def __add__(self, v):
+        return Vertex(self.x + v.x, self.y + v.y, self.z + v.z)
     def __sub__(self, v):
         return Vertex(self.x - v.x, self.y - v.y, self.z - v.z)
 
@@ -86,6 +87,10 @@ class Sphere(object):
             return None
         candidates = [(-B+sqrt(discriminant))/(2*A), (-B-sqrt(discriminant))/(2*A)]
         closestSol = min(candidates)
+        if closestSol <= 0:
+            print(closestSol)
+            return None
+        
         #print("A: {} B: {} C: {} SOL: {}".format(A,B,C, closestSol))
         return ray.getLocation(closestSol)
     

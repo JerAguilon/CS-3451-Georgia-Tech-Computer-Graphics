@@ -16,7 +16,7 @@ krefl = 0
 fov = 0
 
 def setup():
-    size(500, 500) 
+    size(300, 300) 
     noStroke()
     colorMode(RGB, 1.0)  # Processing color values will be in [0, 1]  (not 255)
     background(0, 0, 0)
@@ -41,6 +41,8 @@ def keyPressed():
         interpreter("i8.cli")
     elif key == '9':
         interpreter("i9.cli")
+    elif key == '0':
+        interpreter("i10.cli")
 
 def interpreter(fname):
     global shapes, lightSources, backgroundColor, diffuseColor, fov, \
@@ -151,7 +153,7 @@ def render_scene():
             else:
                 #print(candidates)
                 bestPoint, s = min(candidates)[1:3]
-                pixColor = getColor(ray, s, bestPoint, [0,0,0])
+                pixColor = getColor(ray, s, bestPoint, [0.0,0.0,0.0])
                 pix_color = color(*pixColor)
                 set(i,height-j,pix_color)
             continue
@@ -160,25 +162,24 @@ def render_scene():
             set (i, j, pix_color)         # fill the pixel with the calculated color
     pass
 
-def getColor(ray, s, bestPoint, currColor):    
+def getColor(ray, s, bestPoint, currColor):   
+    
+    # normVector = (bestPoint - s.v).normalize()
+    
+    # redV = 0
+    # greenV = 0
+    # blueV = 0
+    
+    # for light in lightSources:
+    #     lightVector = (light.v - bestPoint).normalize()
+    #     proportion = max(normVector.dotProduct(lightVector),0)
+    #     currColor[0] += s.dr * light.r * proportion
+    #     currColor[1] += s.dg * light.g * proportion
+    #     currColor[2] += s.db * light.b * proportion
+
+    # return currColor 
     normVector = (bestPoint - s.v).normalize()
     
-    redV = 0
-    greenV = 0
-    blueV = 0
-    
-    for light in lightSources:
-        lightVector = (light.v - bestPoint).normalize()
-        proportion = max(normVector.dotProduct(lightVector),0)
-        redV += s.dr * light.r * proportion
-        greenV += s.dg * light.g * proportion
-        blueV += s.db * light.b * proportion
-
-    output = (redV, greenV, blueV)
-    return output
-    
-    normVector = (bestPoint - s.v).normalize()
-
     # if s.krefl > 0:    
     #     normRay = ray.slope.normalize()
     #     reflectedRay = (normRay.scale(2 * normVector.dotProduct(normRay)) - normRay).scale(-1)
@@ -204,40 +205,32 @@ def getColor(ray, s, bestPoint, currColor):
     #         currColor[0] += surface.krefl * backgroundColor[0]
     #         currColor[1] += surface.krefl * backgroundColor[1]
     #         currColor[2] += surface.krefl * backgroundColor[2]
+    
+    currColor[0] += s.ar    
+    currColor[1] += s.ag
+    currColor[2] += s.ab
 
-            
-    # currColor[0] += s.ar
-    # currColor[1] += s.ag
-    # currColor[2] += s.ab
-    
-    # BASE CASE: surface is not reflective
     for light in lightSources:
-        rayToBestPoint = Ray(bestPoint, light.v - bestPoint)
+        lightVector = (light.v - bestPoint).normalize()
         
-        
-        overshadowedPoint = None
-        overshadowedDist = float('inf')
+        overshadowPoint = None
         # find overshadowing objects
-        for s in shapes:
-            currPoint = s.getIntersect(rayToBestPoint)
+        for currShape in shapes:
+            currPoint = currShape.getIntersect(Ray(bestPoint, lightVector))
+            if currPoint != None \
+               and (overshadowPoint == None \
+                    or currPoint.distance(bestPoint) < bestPoint.distance(ray.origin)):
+                overshadowPoint = currPoint
+        if overshadowPoint == None:
+            proportion = max(normVector.dotProduct(lightVector),0)
+            currColor[0] += s.dr * light.r * proportion
+            currColor[1] += s.dg * light.g * proportion
+            currColor[2] += s.db * light.b * proportion
+            
+            L = lightVector.normalize()
+
         
-        proportion = max(normVector.dotProduct(rayToBestPoint.slope.normalize()),0)
-        currColor[0] += s.dr * light.r * proportion
-        currColor[1] += s.dg * light.g * proportion
-        currColor[2] += s.db * light.b * proportion
-        
-        
-        
-        L = rayToBestPoint.slope.normalize()
-        R = (normVector.scale(2 * normVector.dotProduct(L)) - L).normalize()
-        E = ray.slope.normalize()
-        
-        # if R.dotProduct(E) < 0:
-        #     factor = R.dotProduct(E)**s.phong
-        #     currColor[0] += factor * s.sr * light.r
-        #     currColor[1] += factor * s.sg * light.g
-        #     currColor[2] += factor * s.sb * light.b
-    
+    #print("{} {} {}".format(s.ar, s.ag, s.ab))
     return currColor
 
 # should remain empty for this assignment
