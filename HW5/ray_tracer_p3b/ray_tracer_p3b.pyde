@@ -165,14 +165,14 @@ def render_scene():
             set (i, j, pix_color)         # fill the pixel with the calculated color
     pass
 
-def getColor(ray, s, bestPoint, currColor):   
+def getColor(ray, s, bestPoint, currColor):
     
     output = list(currColor)
     normVector = (bestPoint - s.v).normalize()
     output[0] += s.ar    
     output[1] += s.ag
     output[2] += s.ab
-
+    
     for light in lightSources:
         lightVector = (light.v - bestPoint).normalize()
         
@@ -190,41 +190,31 @@ def getColor(ray, s, bestPoint, currColor):
             output[1] += s.dg * light.g * proportion
             output[2] += s.db * light.b * proportion
             
-            L = lightVector.normalize()
             
     if s.krefl > 0:    
         normRay = ray.slope.normalize()
-        reflectedRay = (normVector.scale(2 * normVector.dotProduct(normRay)) - normRay).scale(-1)
-        reflection = Ray(bestPoint, reflectedRay)
-        
-        nextShape = None
-        nextPoint = None
-        bestDist = float('inf')
+        reflectedVector = (normVector.scale(2 * normVector.dotProduct(normRay)) - normRay).scale(-1)
+        reflection = Ray(bestPoint, reflectedVector)
+        candidates = []
         for currShape in shapes:
-            if currShape != s:
-                currIntersection = currShape.getIntersect(reflection)
-                if currIntersection != None:
-                    d = currIntersection.distance(reflection.origin)
-                    if d < bestDist:
-                        nextShape = currShape
-                        bestDist = d
-                        nextPoint = currIntersection
-        if nextShape != None:
-            # copy currColor to instantiate new object
-            print("RECURSING")
-            reflectionColor = getColor(reflection, nextShape, nextPoint, list(currColor))
-            output[0] += s.krefl * reflectionColor[0]
-            output[1] += s.krefl * reflectionColor[1]
-            output[2] += s.krefl * reflectionColor[2]
-        else:
+            if currShape == s:
+                continue
+            curr = currShape.getIntersect(reflection)
+            if curr != None:
+                distance = curr.distance(ray.origin)
+                candidates.append((distance, curr, currShape))
+        if len(candidates) == 0:
             output[0] += s.krefl * backgroundColor[0]
             output[1] += s.krefl * backgroundColor[1]
             output[2] += s.krefl * backgroundColor[2]
-    
-
-        
-    #print("{} {} {}".format(s.ar, s.ag, s.ab))
-    return currColor
+        else:
+            nextObj = min(candidates)
+            print("RECURSING")
+            recursiveColor = getColor(reflection, nextObj[2], nextObj[1], list(currColor))
+            output[0] += s.krefl * recursiveColor[0]
+            output[1] += s.krefl * recursiveColor[1]
+            output[2] += s.krefl * recursiveColor[2]
+    return output
 
 # should remain empty for this assignment
 def draw():
