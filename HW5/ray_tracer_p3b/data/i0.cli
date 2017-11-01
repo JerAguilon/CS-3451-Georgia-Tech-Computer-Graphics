@@ -1,0 +1,4 @@
+# draw a while rectangle, to show how the parser works
+
+rect  30 30  200 300
+
