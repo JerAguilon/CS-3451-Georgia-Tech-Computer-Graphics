@@ -6,7 +6,6 @@ from util import *
 
 
 shapes = []
-vertices = []
 lightSources = []
 backgroundColor = (0,0,0)
 diffuseColor = (0,0,0)
@@ -47,7 +46,7 @@ def keyPressed():
 
 def interpreter(fname):
     global shapes, lightSources, backgroundColor, diffuseColor, fov, \
-           ambientColor, specularColor, phong, krefl, vertices
+           ambientColor, specularColor, phong, krefl
     
     fname = "data/" + fname
     # read in the lines of a file
@@ -65,7 +64,7 @@ def interpreter(fname):
             x = float(words[2])
             y = float(words[3])
             z = float(words[4])
-            v = Vector(x,y,z)
+            v = Vertex(x,y,z)
             shapes.append(Sphere(radius, v, 
                                  diffuseColor[0], diffuseColor[1], diffuseColor[2],
                                  ambientColor[0], ambientColor[1], ambientColor[2],
@@ -89,7 +88,7 @@ def interpreter(fname):
             r = float(words[4])
             g = float(words[5])
             b = float(words[6])
-            v = Vector(x,y,z)
+            v = Vertex(x,y,z)
             
             light = LightSource(v,r,g,b)
             lightSources.append(light)
@@ -112,16 +111,13 @@ def interpreter(fname):
             
             phong = float(words[10])
             krefl = float(words[11])
+            pass
         elif words[0] == 'begin':
-            vertices = []
+            pass
         elif words[0] == 'vertex':
-            vertices.append(Vector(float(words[1]), float(words[2]), float(words[3])))
+            pass
         elif words[0] == 'end':
-            shapes.append(Triangle(vertices,
-                                 diffuseColor[0], diffuseColor[1], diffuseColor[2],
-                                 ambientColor[0], ambientColor[1], ambientColor[2],
-                                 specularColor[0], specularColor[1], specularColor[2],
-                                 phong, krefl))
+            pass
         elif words[0] == 'write':
             render_scene()    # render the scene
             save(words[1])  # write the image to a file
@@ -140,12 +136,11 @@ def render_scene():
     print(fov)
     k = tan(radians(fov/2))
     for j in range(height):
-        print(j)
         for i in range(width):
             transY = (j - height / 2) * 2*k / (height)
             transX = (i - width / 2) * 2*k / (width)
-            v1 = Vector(0,0,0)
-            v2 = Vector(transX, transY, -1)
+            v1 = Vertex(0,0,0)
+            v2 = Vertex(transX, transY, -1)
             
             ray = Ray(v1, v2)
             candidates = []
@@ -173,12 +168,7 @@ def render_scene():
 def getColor(ray, s, bestPoint, currColor):
     
     output = list(currColor)
-    
-    if type(s) is Sphere:
-        normVector = (bestPoint - s.v).normalize()
-    else:
-        # gotta be a triangle
-        normVector = ((s.b - s.a) * (s.c - s.a)).normalize()
+    normVector = (bestPoint - s.v).normalize()
     
     # output[i] = ambient[i] + cosineAngle * diffuse[i] * light[i] + [TODO Phong] + krefl[i] * outputNext[i]
     output[0] += s.ar    
@@ -187,54 +177,31 @@ def getColor(ray, s, bestPoint, currColor):
     
     for light in lightSources:
         lightVector = (light.v - bestPoint).normalize()
-        
-        isCovered = False
+
+        overshadowPoint = None
         # find overshadowing objects
-        if type(s) in [Sphere, Triangle]:
-            for currShape in shapes:
-                
-                offset = lightVector.scale(-.1)
-                choice1 = bestPoint + offset
-                choice2 = bestPoint - offset
-                
-                # maximize the dist.from the object
-                if type(s) is Sphere:
-                    if s.v.distance(choice1) > s.v.distance(choice2):
-                        choice = choice1
-                    else:
-                        choice = choice2
-                else:
-                    if light.v.distance(choice1) < light.v.distance(choice2):
-                        choice = bestPoint
-                    else:
-                        choice = bestPoint                 
-                currPoint = currShape.getIntersect(Ray(choice, lightVector))
-                if currPoint != None:
-                    isCovered = True
-        if not isCovered:                      
-            if type(s) is Triangle:
-                if normVector[y] < 0:
-                    normVector = normVector.scale(-1)
-            proportion = max(normVector.dotProduct(lightVector), 0)
+        for currShape in shapes:
+            if currS     currPoint = currShape.getIntersect(Ray(bestPoint, lightVector))
+            if currPoint != None \
+               and (overshadowPoint == None \
+                    or currPoint.distance(bestPoint) < bestPoint.distance(ray.origin)):
+                overshadowPoint = currPoint
+        if overshadowPoint == None:
+            proportion = max(normVector.dotProduct(lightVector),0)
             output[0] += s.dr * light.r * proportion
             output[1] += s.dg * light.g * proportion
             output[2] += s.db * light.b * proportion
             
-            e = (ray.origin - bestPoint).normalize() # surface to eye
-            l = (light.v - bestPoint).normalize() # light to surface
-            # r = normVector.scale(2 * (l.dotProduct(normVector))) - l
+            e = ray.origin - bestPoint # surface to eye
+            l = light.v - bestPoint # light to surface
+            r = n.scale(2 * (l.dotProduct(norMVector))) - l
+            print(r.magnitude())
             
-            h = (e + l).normalize()
+            h =magnitude)lize()
             factor = h.dotProduct(normVector)**s.phong
-            # factor = max(0, e.dotProduct(r))**s.phong
             output[0] += s.sr * light.r * factor
             output[1] += s.sg * light.g * factor
             output[2] += s.sb * light.b * factor
-            if type(s) is Triangle:
-                pass
-                # print("{} {} {} {} {} {}".format(s.dr, s.dg, s.db, s.sr, s.sg, s.sb))
-                # print("{} {}".format(proportion, light.r))
-                # print(output)
             
             
     if s.krefl > 0:    

@@ -1,4 +1,4 @@
-class Vertex(object):
+class Vector(object):
 
     def __init__(self, x, y, z):
         self.x = x
@@ -8,14 +8,14 @@ class Vertex(object):
     def __repr__(self):
         return "{} {} {}".format(self.x, self.y, self.z)
     def scale(self, n):
-        return Vertex(self.x * n, self.y * n, self.z * n)
+        return Vector(self.x * n, self.y * n, self.z * n)
 
     def distance(self, v):
         return sqrt((v.x - self.x) ** 2 + (v.y - self.y) ** 2 + (v.z - self.z) ** 2)
     def __add__(self, v):
-        return Vertex(self.x + v.x, self.y + v.y, self.z + v.z)
+        return Vector(self.x + v.x, self.y + v.y, self.z + v.z)
     def __sub__(self, v):
-        return Vertex(self.x - v.x, self.y - v.y, self.z - v.z)
+        return Vector(self.x - v.x, self.y - v.y, self.z - v.z)
 
     def dotProduct(self, v):
         return self.x * v.x + self.y * v.y + self.z * v.z
@@ -24,7 +24,7 @@ class Vertex(object):
         x = self.y * v.z - self.z * v.y
         y = self.z * v.x - self.x * v.z
         z = self.x * v.y - self.y * v.x
-        return Vertex(x, y, z)
+        return Vector(x, y, z)
 
     def length(self):
         pre = (self.x) ** 2 + (self.y) ** 2 + (self.z) ** 2
@@ -33,7 +33,7 @@ class Vertex(object):
     
     def normalize(self):
         vLength = self.length()
-        return Vertex(self.x / vLength, self.y / vLength, self.z / vLength)
+        return Vector(self.x / vLength, self.y / vLength, self.z / vLength)
 class LightSource(object):
 
     def __init__(self, v, r, g, b):
@@ -52,8 +52,44 @@ class Ray(object):
         x = self.origin.x + t * self.slope.x
         y = self.origin.y + t * self.slope.y
         z = self.origin.z + t * self.slope.z
-        return Vertex(x, y, z)
+        return Vector(x, y, z)
 
+class Triangle(object):
+    def __init__(self, vectors, dr, dg, db, ar, ag, ab, sr, sg, sb, phong, krefl):
+        self.a, self.b, self.c = vectors
+        
+        self.dr = dr
+        self. dg = dg
+        self.db = db
+        
+        self.ar = ar
+        self.ag = ag
+        self.ab = ab
+        
+        self.sr = sr
+        self.sg = sg
+        self.sb = sb
+        self.phong = phong
+        self.krefl = krefl
+        
+    def getIntersect(self, ray):
+        normVector = ((self.b - self.a) * (self.c - self.a)).normalize()
+        dotProduct = normVector.dotProduct(ray.slope)
+        if dotProduct == 0:
+            # undefined
+            return None
+        d = normVector.dotProduct(self.a)
+        t = (d - normVector.dotProduct(ray.origin)) / dotProduct
+        if (t <= .000001):
+            return None
+        
+        point =  ray.getLocation(t)
+        if ((self.b - self.a) * (point - self.a)).dotProduct(normVector) >= -.0000000000001 \
+           and ((self.c - self.b) * (point - self.b)).dotProduct(normVector) >= -.0000000000001 \
+           and ((self.a - self.c) * (point - self.c)).dotProduct(normVector) >= -.0000000000001:
+            return point
+        else:
+            return None
 class Sphere(object):
 
     def __init__(self, r, v,dr, dg, db, ar, ag, ab, sr, sg, sb, phong, krefl):
@@ -87,7 +123,7 @@ class Sphere(object):
             return None
         candidates = [(-B+sqrt(discriminant))/(2*A), (-B-sqrt(discriminant))/(2*A)]
         closestSol = min(candidates)
-        if closestSol <= 0:
+        if closestSol < 0:#-.001:# and self==s:
             #print(closestSol)
             return None
         
