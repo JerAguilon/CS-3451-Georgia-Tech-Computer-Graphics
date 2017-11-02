@@ -161,7 +161,7 @@ def render_scene():
             else:
                 #print(candidates)
                 bestPoint, s = min(candidates)[1:3]
-                pixColor = getColor(ray, s, bestPoint, [0.0,0.0,0.0])
+                pixColor = getColor(ray, s, bestPoint)
                 pix_color = color(*pixColor)
                 set(i,height-j,pix_color)
             continue
@@ -170,9 +170,8 @@ def render_scene():
             set (i, j, pix_color)         # fill the pixel with the calculated color
     pass
 
-def getColor(ray, s, bestPoint, currColor):
-    
-    output = list(currColor)
+def getColor(ray, s, bestPoint):
+    output = [0,0,0]
     
     if type(s) is Sphere:
         normVector = (bestPoint - s.v).normalize()
@@ -193,7 +192,7 @@ def getColor(ray, s, bestPoint, currColor):
         if type(s) in [Sphere, Triangle]:
             for currShape in shapes:
                 
-                offset = lightVector.scale(-.1)
+                offset = lightVector.scale(-.001)
                 choice1 = bestPoint + offset
                 choice2 = bestPoint - offset
                 
@@ -226,14 +225,7 @@ def getColor(ray, s, bestPoint, currColor):
             # factor = max(0, e.dotProduct(r))**s.phong
             output[0] += s.sr * light.r * factor
             output[1] += s.sg * light.g * factor
-            output[2] += s.sb * light.b * factor
-            if type(s) is Triangle:
-                pass
-                # print("{} {} {} {} {} {}".format(s.dr, s.dg, s.db, s.sr, s.sg, s.sb))
-                # print("{} {}".format(proportion, light.r))
-                # print(output)
-            
-            
+            output[2] += s.sb * light.b * factor    
     if s.krefl > 0:    
         normRay = ray.slope.normalize()
         reflectedVector = (normVector.scale(2 * normVector.dotProduct(normRay)) - normRay).scale(-1)
@@ -252,8 +244,7 @@ def getColor(ray, s, bestPoint, currColor):
             output[2] += s.krefl * backgroundColor[2]
         else:
             nextObj = min(candidates)
-            print("RECURSING")
-            recursiveColor = getColor(reflection, nextObj[2], nextObj[1], list(currColor))
+            recursiveColor = getColor(reflection, nextObj[2], nextObj[1])
             output[0] += s.krefl * recursiveColor[0]
             output[1] += s.krefl * recursiveColor[1]
             output[2] += s.krefl * recursiveColor[2]
