@@ -35,7 +35,6 @@ class Vector(object):
         vLength = self.length()
         return Vector(self.x / vLength, self.y / vLength, self.z / vLength)
 class LightSource(object):
-
     def __init__(self, v, r, g, b):
         self.v = v
         self.r = r
@@ -43,7 +42,6 @@ class LightSource(object):
         self.b = b
 
 class Ray(object):
-
     def __init__(self, origin, slope):
         self.origin = origin
         self.slope = slope
@@ -80,13 +78,13 @@ class Triangle(object):
             return None
         d = normVector.dotProduct(self.a)
         t = (d - normVector.dotProduct(ray.origin)) / dotProduct
-        if (t <= .000001):
+        if (t <= 0):
             return None
         
         point =  ray.getLocation(t)
-        if ((self.b - self.a) * (point - self.a)).dotProduct(normVector) >= -.0000000000001 \
-           and ((self.c - self.b) * (point - self.b)).dotProduct(normVector) >= -.0000000000001 \
-           and ((self.a - self.c) * (point - self.c)).dotProduct(normVector) >= -.0000000000001:
+        if ((self.b - self.a) * (point - self.a)).dotProduct(normVector) >= 0 \
+           and ((self.c - self.b) * (point - self.b)).dotProduct(normVector) >= 0 \
+           and ((self.a - self.c) * (point - self.c)).dotProduct(normVector) >= 0:
             return point
         else:
             return None
@@ -123,7 +121,7 @@ class Sphere(object):
             return None
         candidates = [(-B+sqrt(discriminant))/(2*A), (-B-sqrt(discriminant))/(2*A)]
         closestSol = min(candidates)
-        if closestSol < 0:#-.001:# and self==s:
+        if closestSol <= 0:#-.0001:# and self==s:
             #print(closestSol)
             return None
         

@@ -178,54 +178,6 @@ def getColor(ray, s, bestPoint):
     else:
         # gotta be a triangle
         normVector = ((s.b - s.a) * (s.c - s.a)).normalize().scale(-1)
-    
-    # output[i] = ambient[i] + cosineAngle * diffuse[i] * light[i] + [TODO Phong] + krefl[i] * outputNext[i]
-    output[0] += s.ar    
-    output[1] += s.ag
-    output[2] += s.ab
-    
-    for light in lightSources:
-        lightVector = (light.v - bestPoint).normalize()
-        
-        isCovered = False
-        # find overshadowing objects
-        if type(s) in [Sphere, Triangle]:
-            for currShape in shapes:
-                
-                offset = lightVector.scale(-.001)
-                choice1 = bestPoint + offset
-                choice2 = bestPoint - offset
-                
-                # maximize the dist.from the object
-                if type(s) is Sphere:
-                    if s.v.distance(choice1) > s.v.distance(choice2):
-                        choice = choice1
-                    else:
-                        choice = choice2
-                else:
-                    if light.v.distance(choice1) < light.v.distance(choice2):
-                        choice = bestPoint
-                    else:
-                        choice = bestPoint                 
-                currPoint = currShape.getIntersect(Ray(choice, lightVector))
-                if currPoint != None:
-                    isCovered = True
-        if not isCovered:                      
-            proportion = max(normVector.dotProduct(lightVector), 0)
-            output[0] += s.dr * light.r * proportion
-            output[1] += s.dg * light.g * proportion
-            output[2] += s.db * light.b * proportion
-            
-            e = (ray.origin - bestPoint).normalize() # surface to eye
-            l = (light.v - bestPoint).normalize() # light to surface
-            # r = normVector.scale(2 * (l.dotProduct(normVector))) - l
-            
-            h = (e + l).normalize()
-            factor = h.dotProduct(normVector)**s.phong
-            # factor = max(0, e.dotProduct(r))**s.phong
-            output[0] += s.sr * light.r * factor
-            output[1] += s.sg * light.g * factor
-            output[2] += s.sb * light.b * factor    
     if s.krefl > 0:    
         normRay = ray.slope.normalize()
         reflectedVector = (normVector.scale(2 * normVector.dotProduct(normRay)) - normRay).scale(-1)
@@ -247,7 +199,57 @@ def getColor(ray, s, bestPoint):
             recursiveColor = getColor(reflection, nextObj[2], nextObj[1])
             output[0] += s.krefl * recursiveColor[0]
             output[1] += s.krefl * recursiveColor[1]
-            output[2] += s.krefl * recursiveColor[2]
+            output[2] += s.krefl * recursiveColor[2]    
+    # output[i] = ambient[i] + cosineAngle * diffuse[i] * light[i] + [TODO Phong] + krefl[i] * outputNext[i]
+    output[0] += s.ar    
+    output[1] += s.ag
+    output[2] += s.ab
+    
+    for light in lightSources:
+        lightVector = (light.v - bestPoint).normalize()
+        
+        isCovered = False
+        # find overshadowing objects
+        if type(s) in [Sphere, Triangle]:
+            for currShape in shapes:
+                
+                offset = lightVector.scale(-.00001)
+                choice1 = bestPoint + offset
+                choice2 = bestPoint - offset
+                
+                # maximize the dist.from the object
+                if type(s) is Sphere:
+                    if s.v.distance(choice1) > s.v.distance(choice2):
+                        choice = choice1
+                    else:
+                        choice = choice2
+                else:
+                    if light.v.distance(choice1) < light.v.distance(choice2):
+                        choice = choice1
+                    else:
+                        choice = choice2                 
+                currPoint = currShape.getIntersect(Ray(choice, lightVector))
+                # currPoint can't be behind light
+                if currPoint != None \
+                   and (bestPoint.distance(currPoint) < bestPoint.distance(light.v)):
+                    isCovered = True
+        if not isCovered:                      
+            proportion = max(normVector.dotProduct(lightVector), 0)
+            output[0] += s.dr * light.r * proportion
+            output[1] += s.dg * light.g * proportion
+            output[2] += s.db * light.b * proportion
+            
+            e = (ray.origin - bestPoint).normalize() # surface to eye
+            l = (light.v - bestPoint).normalize() # light to surface
+            # r = normVector.scale(2 * (l.dotProduct(normVector))) - l
+            
+            h = (e + l).normalize()
+            factor = h.dotProduct(normVector)**s.phong
+            # factor = max(0, e.dotProduct(r))**s.phong
+            output[0] += s.sr * light.r * factor
+            output[1] += s.sg * light.g * factor
+            output[2] += s.sb * light.b * factor    
+
     return output
 
 # should remain empty for this assignment
