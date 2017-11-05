@@ -170,16 +170,9 @@ def render_scene():
                 #print(candidates)
                 bestPoint, s = min(candidates)[1:3]
                 pixColor = getColor(ray, s, bestPoint, debug)
-                if debug:
-                    set(i, height-j, color(1,0,0))
-                else:        
-                    pix_color = color(*pixColor)
-                    set(i,height-j,pix_color)
+                pix_color = color(*pixColor)
+                set(i,height-j,pix_color)
             continue
-            # create an eye ray for pixel (i,j) and cast it into the scene
-            pix_color = color(0.8, 0.2, 0.4)  # you should calculate the correct pixel color here
-            set (i, j, pix_color)         # fill the pixel with the calculated color
-    pass
 
 def getColor(ray, s, bestPoint, debug):
     if debug:
@@ -276,9 +269,6 @@ def getColor(ray, s, bestPoint, debug):
             output[0] += s.sr * light.r * factor
             output[1] += s.sg * light.g * factor
             output[2] += s.sb * light.b * factor    
-    if debug:
-        print("OUTPUTTING")
-        print(output)
     return output
 
 # should remain empty for this assignment
