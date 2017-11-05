@@ -69,7 +69,9 @@ class Triangle(object):
         self.sb = sb
         self.phong = phong
         self.krefl = krefl
-        
+    def __repr__(self):
+        return "TRIANGLE {} {} {}".format(self.a, self.b, self.c)
+    
     def getIntersect(self, ray):
         normVector = ((self.b - self.a) * (self.c - self.a)).normalize()
         dotProduct = normVector.dotProduct(ray.slope)
@@ -109,7 +111,7 @@ class Sphere(object):
         self.phong = phong
         self.krefl = krefl
     def __repr__(self):
-        return "v: {} r: {}".format(self.v, self.r)
+        return "SPHERE v: {} r: {}".format(self.v, self.r)
         
     def getIntersect(self, ray):
         A = ray.slope.dotProduct(ray.slope)

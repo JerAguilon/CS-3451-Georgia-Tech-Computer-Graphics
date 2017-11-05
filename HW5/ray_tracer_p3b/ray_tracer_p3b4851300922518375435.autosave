@@ -137,19 +137,11 @@ def interpreter(fname):
 
 # render the ray tracing scene
 def render_scene():
-    debugX = 128
-    debugY = 132
-    
     print(fov)
     k = tan(radians(fov/2))
     for j in range(height):
-        # print(j)
+        print(j)
         for i in range(width):
-            if height - j == debugY and i == debugX:
-                debug = True
-            else:
-                debug = False
-            
             transY = (j - height / 2) * 2*k / (height)
             transX = (i - width / 2) * 2*k / (width)
             v1 = Vector(0,0,0)
@@ -169,61 +161,42 @@ def render_scene():
             else:
                 #print(candidates)
                 bestPoint, s = min(candidates)[1:3]
-                pixColor = getColor(ray, s, bestPoint, debug)
-                if debug:
-                    set(i, height-j, color(1,0,0))
-                else:        
-                    pix_color = color(*pixColor)
-                    set(i,height-j,pix_color)
+                pixColor = getColor(ray, s, bestPoint)
+                pix_color = color(*pixColor)
+                set(i,height-j,pix_color)
             continue
             # create an eye ray for pixel (i,j) and cast it into the scene
             pix_color = color(0.8, 0.2, 0.4)  # you should calculate the correct pixel color here
             set (i, j, pix_color)         # fill the pixel with the calculated color
     pass
 
-def getColor(ray, s, bestPoint, debug):
-    if debug:
-        print("DEBUGGING")
-        print(s)
-    
+def getColor(ray, s, bestPoint):
     output = [0,0,0]
     
     if type(s) is Sphere:
         normVector = (bestPoint - s.v).normalize()
     else:
-        # gotta be a triangle
-        normVector = ((s.b - s.a) * (s.c - s.a)).normalize().scale(-1)
-    if s.krefl > 0:
-        if debug:
-            print("REFLECTING")
+        # gotta be a triangle    normVector = ((s.b - s.a) * (s.c - s.a)).normalize().scale(-1)
+(-1)
+    if s.krefl > 0:    
         normRay = ray.slope.normalize()
         reflectedVector = (normVector.scale(2 * normVector.dotProduct(normRay)) - normRay).scale(-1)
         reflection = Ray(bestPoint, reflectedVector)
-        
-        if debug:
-            print("~~~~~~~~~~~~~~~~~~~~~~");
-            print(reflection.origin)
-            print(reflection.slope)
-            print("~~~~~~~~~~~~~~~~~~~~~~")
-        
         candidates = []
         for currShape in shapes:
             if currShape == s:
                 continue
             curr = currShape.getIntersect(reflection)
             if curr != None:
-                distance = curr.distance(bestPoint)
+                distance = curr.distance(ray.origin)
                 candidates.append((distance, curr, currShape))
         if len(candidates) == 0:
             output[0] += s.krefl * backgroundColor[0]
             output[1] += s.krefl * backgroundColor[1]
             output[2] += s.krefl * backgroundColor[2]
         else:
-            if debug:
-                print("CANDIDATES")
-                print(candidates)
             nextObj = min(candidates)
-            recursiveColor = getColor(reflection, nextObj[2], nextObj[1], debug)
+            recursiveColor = getColor(reflection, nextObj[2], nextObj[1])
             output[0] += s.krefl * recursiveColor[0]
             output[1] += s.krefl * recursiveColor[1]
             output[2] += s.krefl * recursiveColor[2]    
@@ -258,7 +231,8 @@ def getColor(ray, s, bestPoint, debug):
                 currPoint = currShape.getIntersect(Ray(choice, lightVector))
                 # currPoint can't be behind light
                 if currPoint != None \
-                   and (bestPoint.distance(currPoint) < bestPoint.distance(light.v)):
+                   and (bestPoint.distance(currPoint) < bestPoint.distance(light.v)) \
+                   and (bestPoint.distance(currPoint) < bestPoint.distance(ray.v):
                     isCovered = True
         if not isCovered:                      
             proportion = max(normVector.dotProduct(lightVector), 0)
@@ -276,9 +250,7 @@ def getColor(ray, s, bestPoint, debug):
             output[0] += s.sr * light.r * factor
             output[1] += s.sg * light.g * factor
             output[2] += s.sb * light.b * factor    
-    if debug:
-        print("OUTPUTTING")
-        print(output)
+
     return output
 
 # should remain empty for this assignment
