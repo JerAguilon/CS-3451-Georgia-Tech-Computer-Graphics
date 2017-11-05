@@ -78,15 +78,20 @@ class Triangle(object):
         if dotProduct == 0:
             # undefined
             return None
-        d = normVector.dotProduct(self.a)
-        t = (d - normVector.dotProduct(ray.origin)) / dotProduct
+        t = float(normVector.dotProduct(self.a - ray.origin)) / dotProduct
         if (t <= 0):
             return None
         
         point =  ray.getLocation(t)
-        if ((self.b - self.a) * (point - self.a)).dotProduct(normVector) >= 0 \
-           and ((self.c - self.b) * (point - self.b)).dotProduct(normVector) >= 0 \
-           and ((self.a - self.c) * (point - self.c)).dotProduct(normVector) >= 0:
+        
+        v1 = self.b - self.a
+        v2 = self.c - self.b
+        v3 = self.a - self.c
+        
+        # https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates
+        if ((v1) * (point - self.a)).dotProduct(normVector) >= 0 \
+           and ((v2) * (point - self.b)).dotProduct(normVector) >= 0 \
+           and ((v3) * (point - self.c)).dotProduct(normVector) >= 0:
             return point
         else:
             return None
