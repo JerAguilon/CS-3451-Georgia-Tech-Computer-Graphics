@@ -17,7 +17,7 @@ krefl = 0
 fov = 0
 
 def setup():
-    size(300, 300) 
+    size(500, 500) 
     noStroke()
     colorMode(RGB, 1.0)  # Processing color values will be in [0, 1]  (not 255)
     background(0, 0, 0)
@@ -143,7 +143,7 @@ def render_scene():
     print(fov)
     k = tan(radians(fov/2))
     for j in range(height):
-        # print(j)
+        print(j)
         for i in range(width):
             if height - j == debugY and i == debugX:
                 debug = True
@@ -157,7 +157,6 @@ def render_scene():
             
             ray = Ray(v1, v2)
             candidates = []
-            #print(shapes)
             for s in shapes:
                 curr = s.getIntersect(ray)
                 if curr != None:
