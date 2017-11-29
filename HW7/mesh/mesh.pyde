@@ -12,7 +12,7 @@ class Mesh(object):
         self.vertex_shading = True
         self.white = True
         self.colors = [(random(255), random(255), random(255)) for _ in range(self.num_faces)]
-    
+        
     def set_random_colors(self):
         self.colors = [(random(255), random(255), random(255)) for _ in range(self.num_faces)]
                   
@@ -31,7 +31,6 @@ class Mesh(object):
         return output
     
     def _getOpposites(self):
-        print(self.geometry)
         output = [-1 for _ in range(len(self.geometry))]
         for i in range(len(self.geometry)):
             for j in range(len(self.geometry)):
@@ -64,12 +63,67 @@ class Mesh(object):
             if self.vertices[i] == v:
                 return self.vertex_normals[i]
         raise Exception()
+        
+    def get_dual(self):
+        dual_vertices = []
+        dual_geometry = []
+        for i, v in enumerate(self.vertices):
+            for c, v_index in enumerate(self.geometry):
+                if v_index == i:
+                    v_curr = self.vertices[i]
+                    v_next = self.vertices[self.geometry[self._next(c)]]
+                    v_prev = self.vertices[self.geometry[self._prev(c)]]
+                    centroid = self._getTriangleCentroid(v_curr, v_next, v_prev)
+                    if centroid not in dual_vertices:
+                        dual_vertices.append(centroid)
+                    
+                    swing_average = centroid
+                    total = 1
+                    next = self._swing(c)
+                    
+                    centroid_list = [centroid]
+                    print("VERTICES LIST: " + str(dual_vertices))
+                    while next != c:
+                        v_curr = self.vertices[self.geometry[next]]
+                        v_next = self.vertices[self.geometry[self._next(next)]]
+                        v_prev = self.vertices[self.geometry[self._prev(next)]]
+                        new_centroid = self._getTriangleCentroid(v_curr, v_next, v_prev)
+                        if new_centroid not in dual_vertices:
+                            dual_vertices.append(new_centroid)
+                        total += 1
+                        swing_average = PVector.add(swing_average, new_centroid)
+                        centroid_list.append(new_centroid)
+                        next = self._swing(next)
+                    swing_average.mult(1/float(total))
+                    dual_vertices.append(swing_average)
+                    
+                    finder_list = []
+                    for centroid_index, i_centroid in enumerate(centroid_list):
+                        finder_list.append(self._get_vertex_index(dual_vertices, i_centroid))
+                    for centroid_index, i_centroid in enumerate(centroid_list):
+                        dual_geometry.append(len(dual_vertices) - 1)
+                        dual_geometry.append(finder_list[centroid_index])
+                        dual_geometry.append(finder_list[(centroid_index + 1) % len(centroid_list)])
+                    break
+        print(dual_vertices)
+        return Mesh(len(dual_vertices), int(len(dual_geometry)/3), dual_vertices, dual_geometry)
+    def _get_vertex_index(self, vertex_list, v):
+        for i, v_cand in enumerate(vertex_list):
+            if v_cand == v:
+                return i
+        return -1
     
     def _next(self, cornerId):
         return cornerId - (cornerId % 3) + ((cornerId+1) % 3)
     def _prev(self, cornerId):
         return self._next(self._next(cornerId))
-
+    def _swing(self, cornerId):
+        return self._next(self.opposites[self._next(cornerId)])
+    def _getTriangleCentroid(self, v1, v2, v3):
+        x = (v1.x + v2.x + v3.x)/float(3)
+        y = (v1.y + v2.y + v3.y)/float(3)
+        z = (v1.z + v2.z + v3.z)/float(3)
+        return PVector(x,y,z)
 
 rotate_flag = True    # automatic rotation of model?
 time = 0   # keep track of passing time, for automatic rotation
@@ -120,7 +174,6 @@ def draw():
                 fill(200,200,200)
             else:
                 fill(*current_mesh.colors[face_id])
-            print(face_id)
             v1 = current_mesh.vertices[current_mesh.geometry[face_id * 3]]
             v2 = current_mesh.vertices[current_mesh.geometry[face_id * 3 + 1]]
             v3 = current_mesh.vertices[current_mesh.geometry[face_id * 3 + 2]]
@@ -180,6 +233,8 @@ def keyPressed():
             current_mesh.white = True
         pass  # color faces white
     elif key == 'd':
+        if current_mesh != None:
+            current_mesh = current_mesh.get_dual()
         pass  # calculate the dual mesh
     elif key == 'q':
         exit()
