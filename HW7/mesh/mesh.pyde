@@ -8,6 +8,7 @@ class Mesh(object):
         self.geometry = geometry
         self.face_normals = self._getFaceNormals()
         self.vertex_normals = self._getVertexNormals()
+        self.opposites = self._getOpposites()
         self.vertex_shading = True
         self.white = True
         self.colors = [(random(255), random(255), random(255)) for _ in range(self.num_faces)]
@@ -28,6 +29,21 @@ class Mesh(object):
             n.mult(-1)
             output.append(n)
         return output
+    
+    def _getOpposites(self):
+        print(self.geometry)
+        output = [-1 for _ in range(len(self.geometry))]
+        for i in range(len(self.geometry)):
+            for j in range(len(self.geometry)):
+                nextI = self.vertices[self.geometry[self._next(i)]]
+                prevI = self.vertices[self.geometry[self._prev(i)]]
+                nextJ = self.vertices[self.geometry[self._next(j)]]
+                prevJ = self.vertices[self.geometry[self._prev(j)]]
+                if nextI == prevJ and prevI == nextJ:
+                    output[i] = j
+                    output[j] = i
+        return output
+    
     def _getVertexNormals(self):
         output = []
         
@@ -50,9 +66,9 @@ class Mesh(object):
         raise Exception()
     
     def _next(self, cornerId):
-        return cornerId + ((currCorner+1) % 3)
+        return cornerId - (cornerId % 3) + ((cornerId+1) % 3)
     def _prev(self, cornerId):
-        return _next(_next(cornerId))
+        return self._next(self._next(cornerId))
 
 
 rotate_flag = True    # automatic rotation of model?
