@@ -48,6 +48,11 @@ class Mesh(object):
             if self.vertices[i] == v:
                 return self.vertex_normals[i]
         raise Exception()
+    
+    def _next(self, cornerId):
+        return cornerId + ((currCorner+1) % 3)
+    def _prev(self, cornerId):
+        return _next(_next(cornerId))
 
 
 rotate_flag = True    # automatic rotation of model?
