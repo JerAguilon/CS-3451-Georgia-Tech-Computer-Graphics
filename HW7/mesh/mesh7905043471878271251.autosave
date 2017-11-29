@@ -1,7 +1,9 @@
 # Sample code for starting the mesh processing project
 
 class Mesh(object):
-    def __init__(self, geometry, vertices):
+    def __init__(self, num_vertices, num_faces, geometry, vertices):
+        self.num_vertices = num_vertices
+        self.num_faces = num_faces
         self.vertices = vertices
         self.geometry = geometry
         self.face_normals = self._getFaceNormals()
@@ -9,13 +11,14 @@ class Mesh(object):
         self.opposites = self._getOpposites()
         self.vertex_shading = True
         self.white = True
+        self.colors = [(random(255), random(255), random(255)) for _ in range(self.num_faces)]
         
     def set_random_colors(self):
-        self.colors = [(random(255), random(255), random(255)) for _ in range(len(self.vertices) / 3)]
+        self.colors = [(random(255), random(255), random(255)) for _ in range(self.num_faces)]
                   
     def _getFaceNormals(self):
         output = []
-        for i in range(len(self.vertices) / 3):
+        for i in range(len(self.geometry) / 3):
             v1 = self.geometry[self.vertices[i * 3]]
             v2 = self.geometry[self.vertices[i * 3 + 1]]
             v3 = self.geometry[self.vertices[i * 3 + 2]]
@@ -31,24 +34,22 @@ class Mesh(object):
         output = [-1 for _ in range(len(self.vertices))]
         for i in range(len(self.vertices)):
             for j in range(len(self.vertices)):
-                if i != j:
-                    nextI = self.geometry[self.vertices[self._next(i)]]
-                    prevI = self.geometry[self.vertices[self._prev(i)]]
-                    nextJ = self.geometry[self.vertices[self._next(j)]]
-                    prevJ = self.geometry[self.vertices[self._prev(j)]]
-                    if nextI == prevJ and prevI == nextJ:
-                        output[i] = j
-                        output[j] = i
+                nextI = self.geometry[self.v[self._next(i)]]
+                prevI = self.geometry[self.geometry[self._prev(i)]]
+                nextJ = self.geometry[self.geometry[self._next(j)]]
+                prevJ = self.geometry[self.geometry[self._prev(j)]]
+                if nextI == prevJ and prevI == nextJ:
+                    output[i] = j
+                    output[j] = i
         return output
     
     def _getVertexNormals(self):
         output = []
         
-        for i in range(len(self.geometry)):
-            
+        for i in range(len(self.vertices)):
             adj_face_normals = []
-            for j in range(len(self.vertices)):
-                if self.vertices[j] == i:
+            for j in range(len(self.geometry)):
+                if self.geometry[j] == i:
                     adj_face_normals.append(self.face_normals[j / 3])
             v = PVector(0,0,0)
             for norm in adj_face_normals:
@@ -58,65 +59,65 @@ class Mesh(object):
         return output
     
     def get_vertex_normal(self, v):
-        for i in range(len(self.geometry)):
-            if self.geometry[i] == v:
+        for i in range(len(self.vertices)):
+            if self.vertices[i] == v:
                 return self.vertex_normals[i]
         raise Exception()
-    
-    def create_dual(self):
-        dual_geometry = []
+        
+    def get_dual(self):
         dual_vertices = []
-        for i in range(0, len(self.vertices), 3):
-             v1 = self.geometry[self.vertices[i]]
-             v2 = self.geometry[self.vertices[i+1]]
-             v3 = self.geometry[self.vertices[i+2]]
-             centroid = self._get_triangle_centroid(v1, v2, v3)
-             dual_geometry.append(centroid)
-        for i in range(len(self.geometry)):
-            if i % 100 == 0:
-                print("ITERATING {}/{}".format(i, len(self.geometry)))
-            for j in range(len(self.vertices)):
-                if self.vertices[j] == i:
-                    # found a corner of the triangle @ index j
-                    corners = [j]
-                    next = self._swing(j)
-                    while next != j:
-                        corners.append(next)
+        dual_geometry = []
+        for i, v in enumerate(self.vertices):
+            for c, v_index in enumerate(self.geometry):
+                if v_index == i:
+                    v_curr = self.vertices[i]
+                    v_next = self.vertices[self.geometry[self._next(c)]]
+                    v_prev = self.vertices[self.geometry[self._prev(c)]]
+                    centroid = self._getTriangleCentroid(v_curr, v_next, v_prev)
+                    if centroid not in dual_vertices:
+                        dual_vertices.append(centroid)
+                    
+                    swing_average = centroid
+                    total = 1
+                    next = self._swing(c)
+                    
+                    centroid_list = [centroid]
+                    while next != c:
+                        v_curr = self.vertices[self.geometry[next]]
+                        v_next = self.vertices[self.geometry[self._next(next)]]
+                        v_prev = self.vertices[self.geometry[self._prev(next)]]
+                        new_centroid = self._getTriangleCentroid(v_curr, v_next, v_prev)
+                        if new_centroid not in dual_vertices:
+                            dual_vertices.append(new_centroid)
+                        total += 1
+                        swing_average = PVector.add(swing_average, new_centroid)
+                        centroid_list.append(new_centroid)
                         next = self._swing(next)
-                    cornerAverage = PVector(0,0,0)
-                    for cornerIndex in range(len(corners)):
-                        corner = corners[cornerIndex]
-                        vCentroid = dual_geometry[corner / 3]
-                        cornerAverage.add(vCentroid)
-                    cornerAverage.mult(1 / float(len(corners)))
-                    dual_geometry.append(cornerAverage)
-                    for cornerIndex in range(len(corners)):
-                        corner = corners[cornerIndex]
-                        v1 = corner / 3
-                        
-                        corner2 = corners[(cornerIndex+1) % len(corners)]
-                        v2 = corner2/3
-
-                        v3 = len(dual_geometry) - 1
-                        dual_vertices += [v1, v2, v3]
+                    swing_average.mult(1/float(total))
+                    dual_vertices.append(swing_average)
+                    
+                    finder_list = []
+                    for centroid_index, i_centroid in enumerate(centroid_list):
+                        finder_list.append(self._get_vertex_index(dual_vertices, i_centroid))
+                    for centroid_index, i_centroid in enumerate(centroid_list):
+                        dual_geometry.append(len(dual_vertices) - 1)
+                        dual_geometry.append(finder_list[centroid_index])
+                        dual_geometry.append(finder_list[(centroid_index + 1) % len(centroid_list)])
                     break
-        self.geometry = dual_geometry
-        self.vertices = dual_vertices
-        print("CREATING NORMALS")
-        self.face_normals = self._getFaceNormals()
-        self.vertex_normals = self._getVertexNormals()
-        print("CREATING OPPOSITES")
-        self.opposites = self._getOpposites()
-        self.vertex_shading = True
-        self.white = True
-        print("FINISHED")
+        return Mesh(len(dual_vertices), int(len(dual_geometry)/3), dual_vertices, dual_geometry)
+    def _get_vertex_index(self, vertex_list, v):
+        for i, v_cand in enumerate(vertex_list):
+            if v_cand == v:
+                return i
+        return -1
+    
     def _next(self, cornerId):
         return cornerId - (cornerId % 3) + ((cornerId+1) % 3)
     def _prev(self, cornerId):
         return self._next(self._next(cornerId))
     def _swing(self, cornerId):
         return self._next(self.opposites[self._next(cornerId)])
-    def _get_triangle_centroid(self, v1, v2, v3):
+    def _getTriangleCentroid(self, v1, v2, v3):
         x = (v1.x + v2.x + v3.x)/float(3)
         y = (v1.y + v2.y + v3.y)/float(3)
         z = (v1.z + v2.z + v3.z)/float(3)
@@ -166,18 +167,14 @@ def draw():
         vertex (-1.0,  1.0, 0.0)
         endShape(CLOSE)
     else:
-        i = 0
-        for face_id in range(len(current_mesh.vertices) / 3):
-            i += 1
-            if i % 100 == 0:
-                print("RENDERING FACE {}/{}".format(i, len(current_mesh.vertices)))
+        for face_id in range(len(current_mesh.geometry) / 3):
             if current_mesh.white:
                 fill(200,200,200)
             else:
                 fill(*current_mesh.colors[face_id])
-            v1 = current_mesh.geometry[current_mesh.vertices[face_id * 3]]
-            v2 = current_mesh.geometry[current_mesh.vertices[face_id * 3 + 1]]
-            v3 = current_mesh.geometry[current_mesh.vertices[face_id * 3 + 2]]
+            v1 = current_mesh.vertices[current_mesh.geometry[face_id * 3]]
+            v2 = current_mesh.vertices[current_mesh.geometry[face_id * 3 + 1]]
+            v3 = current_mesh.vertices[current_mesh.geometry[face_id * 3 + 2]]
             
             if current_mesh.vertex_shading:
                 n1 = current_mesh.get_vertex_normal(v1)
@@ -235,7 +232,7 @@ def keyPressed():
         pass  # color faces white
     elif key == 'd':
         if current_mesh != None:
-            current_mesh.create_dual()
+            current_mesh = current_mesh.get_dual()
         pass  # calculate the dual mesh
     elif key == 'q':
         exit()
@@ -259,16 +256,16 @@ def read_mesh(filename):
     print "number of faces =", num_faces
 
     # read in the vertices
-    geometry = []
+    vertices = []
     for i in range(num_vertices):
         words = lines[i+2].split()
         x = float(words[0])
         y = float(words[1])
         z = float(words[2])
         print "vertex = ", x, y, z
-        geometry.append(PVector(x,y,z))
+        vertices.append(PVector(x,y,z))
     # read in the faces
-    vertices = []
+    geometry = []
     for i in range(num_faces):
         j = i + num_vertices + 2
         words = lines[j].split()
@@ -280,5 +277,5 @@ def read_mesh(filename):
         index2 = int(words[2])
         index3 = int(words[3])
         print "face =", index1, index2, index3
-        vertices += [index1, index2, index3] # i * 3 + j
-    current_mesh = Mesh(geometry, vertices)
+        geometry += [index1, index2, index3] # i * 3 + j
+    current_mesh = Mesh(num_vertices, num_faces, vertices, geometry)
