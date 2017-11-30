@@ -7,7 +7,7 @@ class Mesh(object):
         self.face_normals = self._getFaceNormals()
         self.vertex_normals = self._getVertexNormals()
         self.opposites = self._getOpposites()
-        self.vertex_shading = True
+        self.vertex_shading = False
         self.white = True
         
     def set_random_colors(self):
@@ -107,8 +107,7 @@ class Mesh(object):
         self.vertex_normals = self._getVertexNormals()
         print("CREATING OPPOSITES")
         self.opposites = self._getOpposites()
-        self.vertex_shading = True
-        self.white = True
+        self.set_random_colors()
         print("FINISHED")
     def _next(self, cornerId):
         return cornerId - (cornerId % 3) + ((cornerId+1) % 3)
