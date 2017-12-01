@@ -5,7 +5,7 @@ class Mesh(object):
         self.vertices = vertices
         self.geometry = geometry
         self.face_normals = self._getFaceNormals()
-        self.vertex_normals = self._getVertexNormals()
+        self.vertex_normals, self.vertex_normal_mapping = self._getVertexNormals()
         self.opposites = self._getOpposites()
         self.vertex_shading = False
         self.white = True
@@ -42,10 +42,10 @@ class Mesh(object):
         return output
     
     def _getVertexNormals(self):
-        output = []
-        
+        vertex_normals = []
+        vertex_normal_mapping = {}
         for i in range(len(self.geometry)):
-            
+            curr_vertex = self.geometry[i]
             adj_face_normals = []
             for j in range(len(self.vertices)):
                 if self.vertices[j] == i:
@@ -54,10 +54,13 @@ class Mesh(object):
             for norm in adj_face_normals:
                 v.add(norm)
             v.normalize()
-            output.append(v)
-        return output
+            vertex_normals.append(v)
+            vertex_normal_mapping[curr_vertex] = v
+        print(vertex_normal_mapping)nnn
+        return vertex_normals, vertex_normal_mapping
     
     def get_vertex_normal(self, v):
+        return self.vertex_normal_mapping[v]
         for i in range(len(self.geometry)):
             if self.geometry[i] == v:
                 return self.vertex_normals[i]
@@ -104,7 +107,7 @@ class Mesh(object):
         self.vertices = dual_vertices
         print("CREATING NORMALS")
         self.face_normals = self._getFaceNormals()
-        self.vertex_normals = self._getVertexNormals()
+        self.vertex_normal_mapping = self._getVertexNormals()
         print("CREATING OPPOSITES")
         self.opposites = self._getOpposites()
         self.set_random_colors()
