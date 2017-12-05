@@ -5,7 +5,7 @@ class Mesh(object):
         self.vertices = vertices
         self.geometry = geometry
         self.face_normals = self._getFaceNormals()
-        self.vertex_normals, self.vertex_normal_mapping = self._getVertexNormals()
+        self.vertex_normal_mapping = self._getVertexNormals()
         self.opposites = self._getOpposites()
         self.vertex_shading = False
         self.white = True
@@ -42,7 +42,6 @@ class Mesh(object):
         return output
     
     def _getVertexNormals(self):
-        vertex_normals = []
         vertex_normal_mapping = {}
         for i in range(len(self.geometry)):
             curr_vertex = self.geometry[i]
@@ -54,10 +53,9 @@ class Mesh(object):
             for norm in adj_face_normals:
                 v.add(norm)
             v.normalize()
-            vertex_normals.append(v)
             vertex_normal_mapping[curr_vertex] = v
-        print(vertex_normal_mapping)nnn
-        return vertex_normals, vertex_normal_mapping
+        print(vertex_normal_mapping)
+        return vertex_normal_mapping
     
     def get_vertex_normal(self, v):
         return self.vertex_normal_mapping[v]
